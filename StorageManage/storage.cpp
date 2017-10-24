@@ -19,16 +19,16 @@ void Storage::createSysHead(char *filename){
 	// 每页的大小，4KB
 	sysHead.desc.sizePerPage = SIZE_PER_PAGE;
 	// 总页数
-	sysHead.desc.totalPage = (SIZE_DATA_SPACE) / (SIZE_PER_PAGE);
+	sysHead.desc.totalPage = (SIZE_DATA_SPACE) / (SIZE_PER_PAGE);  // 49 * 1024
 	// 当前可用的页数，初始化时=totalPage
 	sysHead.desc.pageAvai = sysHead.desc.totalPage;
 
 	// bitMap 空闲空间映射表
-	sysHead.desc.bitMapAddr = ADDR_BITMAP;    //bitMap在存储文件中的起始地址 =1024=1KB
+	sysHead.desc.bitMapAddr = ADDR_BITMAP;    // bitMap在存储文件中的起始地址 =1024=1KB
 	// bitMap的大小，每页用1bit，一共需要"页数"个bit，即"页数/8"个字节
 	sysHead.desc.sizeBitMap = sysHead.desc.totalPage / 8;	//byte
 
-	sysHead.desc.dataAddr = ADDR_DATA;     //数据区起始位置，前面留给bitMap
+	sysHead.desc.dataAddr = ADDR_DATA;     // 数据区起始位置，前面留给bitMap
 	//sysHead.desc.nextfid = 0;
 	sysHead.desc.curFileNum = 0;
 	memset(sysHead.desc.fileDesc, -1, sizeof(struct FileDesc) * MAX_FILE_NUM);
@@ -52,7 +52,7 @@ void Storage::init_database(struct dbSysHead *head, char *filename){
 	FILE *fp;
 	fp = fopen(filename, "rb");
 	if (fp == NULL){
-		printf("数据库文件不存在，开始创建数据库......\n\n");
+		printf("Database file is not exist, begin to create database file......\n\n");
 		this->createSysHead(filename);
 		fp = fopen(filename, "rb");
 	}

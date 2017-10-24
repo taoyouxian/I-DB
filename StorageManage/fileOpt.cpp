@@ -69,12 +69,19 @@ int FileOpt::createFile(struct dbSysHead *head, int type, long reqPageNum){
 }
 //给定文件号fid，查询其在数据库中的下标号
 int FileOpt::queryFileIndex(struct dbSysHead *head, int fid){
-	for (int i = 0; i < MAX_FILE_NUM; i++) {
-		if (head->desc.fileDesc[i].fileID == fid)
-			return i;
+	bool flag = false;
+	int i;
+	for (i = 0; i < MAX_FILE_NUM; i++) {
+		if (head->desc.fileDesc[i].fileID == fid){
+			flag = true;
+			break;
+		}
 	}
-	printf("数据库中不存在文件号为%d的文件！\n", fid);
-	exit(0);
+	if (!flag){
+		printf("数据库中不存在文件号为%d的文件！\n", fid);
+	}
+	//exit(0); 
+	return flag ? i : -1;
 }
 
 // 暂时默认写入的记录长度一定小于页大小（即不允许一条记录跨页）
@@ -210,6 +217,7 @@ void FileOpt::readFile(struct dbSysHead *head, int fid, char *des){
 				readLength = curOffset.offset - preOffset.offset;
 
 			memcpy(des, head->buff.data[mapNo] + SIZE_PER_PAGE - curOffset.offset, readLength);
+			des[readLength] = '\0';
 			printf("%s\n", des);
 
 			preOffset = curOffset;

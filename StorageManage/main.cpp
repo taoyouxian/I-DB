@@ -24,7 +24,7 @@ struct employee{
 	long rid;
 	char name[100];
 	int age;
-	int wage;
+	int weight;
 };
 
 int main(int argc, char *argv[])
@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 	//printf("hello");
 	Storage StorageManager;
 	dbSysHead dbhead; 
-	char filename[100] = "demo.mat";
+	char filename[15] = "tinydb.mat";
 	StorageManager.init_database(&dbhead, filename);
 	StorageManager.show_SysDesc(&dbhead);
 
@@ -41,23 +41,27 @@ int main(int argc, char *argv[])
 	StorageManager.show_SysDesc(&dbhead);
 
 	int fid = StorageManager.fileOpt.createFile(&dbhead, NORMAL_FILE, 1);
-	printf("创建文件%d成功！\n", fid);
+	printf("创建文件%d成功！\n", fid); 
+	//int mapfid = StorageManager.fileOpt.createFile(&dbhead, MAP_FILE, 1);
 
-	int mapfid = StorageManager.fileOpt.createFile(&dbhead, MAP_FILE, 1);
 	sysUpdate(&dbhead);
 	StorageManager.show_SysDesc(&dbhead);
 
 	//int fid = 0;
-	for (int i = 0; i < 200000; i++) {
+	int num = 200;
+	for (int i = 0; i < num; i++) {
 		struct employee emp1 = { i, "abc", 30 + i, 5000 + i };
 		char str[1000];
 		sprintf(str, "%ld", emp1.rid);
 		strcat(str, emp1.name);
+		printf("str: %s\n", str);
 		char tmp[100];
 		sprintf(tmp, "%d", emp1.age);
 		strcat(str, tmp);
-		sprintf(tmp, "%d", emp1.wage);
+		sprintf(tmp, "%d", emp1.weight);
+		printf("tmp: %s\n", tmp);
 		strcat(str, tmp);
+		printf("str: %s\n", str);
 		StorageManager.fileOpt.writeFile(&dbhead, fid, strlen(str), str);
 	}
 

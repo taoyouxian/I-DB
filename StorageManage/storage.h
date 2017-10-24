@@ -8,29 +8,6 @@
 #include "bufOpt.h"
 #include "pageOpt.h"
 
-#define MAX_FILE_NUM 64
-
-#define SIZE_BUFF 1000
-#define SIZE_PER_PAGE (4*1024)
-#define SIZE_DATA_SPACE (196*1024*1024)
-#define SIZE_BIT_MAP  (SIZE_DATA_SPACE/(SIZE_PER_PAGE*8))
-
-#define ADDR_BITMAP 1024
-#define ADDR_DATA (ADDR_BITMAP+SIZE_BIT_MAP)
-
-#define MAP_FILE         0
-#define NORMAL_FILE      1
-#define INDEX_FILE_HASH  2
-#define INDEX_FILE_BTREE 3
-#define INDEX_FILE_SEQ   4
-
-#define ALLO_FAIL  -1
-#define PAGE_AVAI   1
-#define PAGE_UNAVAI 0
-
-#define BUFF_NOT_HIT -1
-
-
 struct buffBlock{
 	long pageNo;
 	long visitTime;
@@ -44,7 +21,7 @@ struct buffSpace{
 };
 
 /* 块内的偏移量表从块的前端向后增长
-* 块内的记录是从后向前放置
+   块内的记录是从后向前放置
 */
 struct offsetInPage{
 	int recordID;
@@ -52,6 +29,7 @@ struct offsetInPage{
 	bool isDeleted;
 };
 
+// 
 struct pageHead{
 	long pageNo;                    // 页号
 	int curRecordNum;               // 当前该页存储的记录个数
@@ -61,7 +39,7 @@ struct pageHead{
 };
 
 struct FileDesc{
-	int fileType;               //标识是否为索引文件，以及索引文件的类型（hash/b树/顺序）
+	int fileType;               //标识是否为索引文件，以及索引文件的类型（hash/b树/顺序,线性）
 	int fileID;                    //文件号
 	long fileFirstPageNo;
 	long filePageNum;              //文件占用了多少页
