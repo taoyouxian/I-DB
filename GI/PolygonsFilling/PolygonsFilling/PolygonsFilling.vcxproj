@@ -115,6 +115,7 @@
       <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>qtmaind.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;Qt5OpenGLd.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <StackReserveSize>100000000</StackReserveSize>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -152,6 +153,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="bufOpt.cpp" />
+    <ClCompile Include="common.cpp" />
     <ClCompile Include="fileOpt.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_glwidget.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -182,6 +185,9 @@
     <ClCompile Include="glwidget.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
+    <ClCompile Include="pageOpt.cpp" />
+    <ClCompile Include="segmentOpt.cpp" />
+    <ClCompile Include="storage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="glwidget.h">
@@ -225,8 +231,14 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="bufOpt.h" />
+    <ClInclude Include="common.h" />
     <ClInclude Include="GeneratedFiles\ui_glwidget.h" />
     <ClInclude Include="fileOpt.h" />
+    <ClInclude Include="pageOpt.h" />
+    <ClInclude Include="segmentOpt.h" />
+    <ClInclude Include="storage.h" />
+    <ClInclude Include="Test.h" />
     <CustomBuild Include="MainWindow.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>

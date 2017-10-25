@@ -1,20 +1,20 @@
-﻿生成启动时间为 2017/10/25 4:46:31。
+﻿生成启动时间为 2017/10/25 13:21:35。
      1>项目“H:\SelfLearning\SAI\Course\tinydbms\GI\PolygonsFilling\PolygonsFilling\PolygonsFilling.vcxproj”在节点 2 上(Build 个目标)。
-     1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V120\Microsoft.CppBuild.targets(388,5): warning MSB8028: The intermediate directory (x64\Debug\) contains files shared from another project (PolygonsFilling.vcxproj).  This can lead to incorrect clean and rebuild behavior.
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /I.\GeneratedFiles /I. /IC:\Qt\Qt5.7.1\5.7\msvc2013_64\include /I.\GeneratedFiles\Debug /IC:\Qt\Qt5.7.1\5.7\msvc2013_64\include\QtCore /IC:\Qt\Qt5.7.1\5.7\msvc2013_64\include\QtGui /IC:\Qt\Qt5.7.1\5.7\msvc2013_64\include\QtOpenGL /IC:\Qt\Qt5.7.1\5.7\msvc2013_64\include\QtWidgets /Zi /nologo /W1 /WX- /Od /D UNICODE /D WIN32 /D WIN64 /D QT_DLL /D QT_CORE_LIB /D QT_GUI_LIB /D QT_OPENGL_LIB /D QT_WIDGETS_LIB /Gm- /EHsc /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Debug\\" /Fd"x64\Debug\vc120.pdb" /Gd /TP /errorReport:prompt MainWindow.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /I.\GeneratedFiles /I. /IC:\Qt\Qt5.7.1\5.7\msvc2013_64\include /I.\GeneratedFiles\Debug /IC:\Qt\Qt5.7.1\5.7\msvc2013_64\include\QtCore /IC:\Qt\Qt5.7.1\5.7\msvc2013_64\include\QtGui /IC:\Qt\Qt5.7.1\5.7\msvc2013_64\include\QtOpenGL /IC:\Qt\Qt5.7.1\5.7\msvc2013_64\include\QtWidgets /Zi /nologo /W1 /WX- /Od /D UNICODE /D WIN32 /D WIN64 /D QT_DLL /D QT_CORE_LIB /D QT_GUI_LIB /D QT_OPENGL_LIB /D QT_WIDGETS_LIB /Gm- /EHsc /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Debug\\" /Fd"x64\Debug\vc120.pdb" /Gd /TP /errorReport:prompt bufOpt.cpp fileOpt.cpp GeneratedFiles\Debug\moc_MainWindow.cpp main.cpp MainWindow.cpp pageOpt.cpp storage.cpp
+         bufOpt.cpp
+         fileOpt.cpp
+         moc_MainWindow.cpp
+         main.cpp
          MainWindow.cpp
-       Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"H:\SelfLearning\SAI\Course\tinydb\x64\Debug\\tinydbms_gi.exe" /NOLOGO /LIBPATH:C:\Qt\Qt5.7.1\5.7\msvc2013_64\lib qtmaind.lib Qt5Cored.lib Qt5Guid.lib Qt5Widgetsd.lib Qt5OpenGLd.lib opengl32.lib glu32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"H:\SelfLearning\SAI\Course\tinydb\x64\Debug\tinydbms_gi.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"H:\SelfLearning\SAI\Course\tinydb\x64\Debug\tinydbms_gi.lib" /MACHINE:X64 x64\Debug\fileOpt.obj
-         x64\Debug\moc_glwidget.obj
-         x64\Debug\moc_MainWindow.obj
-         x64\Debug\qrc_glwidget.obj
-         x64\Debug\glwidget.obj
-         x64\Debug\main.obj
-         x64\Debug\MainWindow.obj
-         PolygonsFilling.vcxproj -> H:\SelfLearning\SAI\Course\tinydb\x64\Debug\tinydbms_gi.exe
-     1>已完成生成项目“H:\SelfLearning\SAI\Course\tinydbms\GI\PolygonsFilling\PolygonsFilling\PolygonsFilling.vcxproj”(Build 个目标)的操作。
+     1>MainWindow.cpp(236): error C2248: “FileOpt::OpenFileDialog”: 无法访问 private 成员(在“FileOpt”类中声明)
+                 h:\selflearning\sai\course\tinydbms\gi\polygonsfilling\polygonsfilling\fileOpt.h(49) : 参见“FileOpt::OpenFileDialog”的声明
+                 h:\selflearning\sai\course\tinydbms\gi\polygonsfilling\polygonsfilling\fileOpt.h(29) : 参见“FileOpt”的声明
+         pageOpt.cpp
+         storage.cpp
+         正在生成代码...
+     1>已完成生成项目“H:\SelfLearning\SAI\Course\tinydbms\GI\PolygonsFilling\PolygonsFilling\PolygonsFilling.vcxproj”(Build 个目标)的操作 - 失败。
 
-生成成功。
+生成失败。
 
-已用时间 00:00:03.32
+已用时间 00:00:13.68
