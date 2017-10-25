@@ -5,20 +5,23 @@
 
 #include <iostream>
 #include <cstdio>
+#include <time.h>
 #include <vector> 
 #include <fstream>
 using namespace std; 
 
 // 常见配置参数
-#define MAX_FILE_NUM 64
+#define MAX_FILE_NUM 1 // 64
 
-#define SIZE_BUFF 1000
-#define SIZE_PER_PAGE (4*1024)
-#define SIZE_DATA_SPACE (196*1024*1024)
-#define SIZE_BIT_MAP  (SIZE_DATA_SPACE/(SIZE_PER_PAGE*8))
+#define SEG_NUM 4
+
+#define BUFFER_Size 1000
+#define PAGE_SIZE (4 * 1024)
+#define DATA_SPACE_SIZE (196*1024*1024)
+#define BIT_MAP_SIZE  (DATA_SPACE_SIZE / (PAGE_SIZE * 8))
 
 #define ADDR_BITMAP 1024
-#define ADDR_DATA (ADDR_BITMAP+SIZE_BIT_MAP)
+#define ADDR_DATA (ADDR_BITMAP + BIT_MAP_SIZE)
 
 #define MAP_FILE         0
 #define NORMAL_FILE      1
@@ -27,10 +30,11 @@ using namespace std;
 #define INDEX_FILE_SEQ   4
 
 #define ALLO_FAIL  -1
-#define PAGE_AVAI   1
-#define PAGE_UNAVAI 0
+#define PAGE_FREE   1
+#define PAGE_UNFREE 0
 
 #define BUFF_NOT_HIT -1
+
 
 class common
 {

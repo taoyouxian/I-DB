@@ -1,78 +1,68 @@
 #include "storage.h" 
-
-//更新，把内存中的所有数据写入到磁盘中
-int sysUpdate(struct dbSysHead *head){
-	rewind(head->fpdesc);
-	fwrite(&(head->desc), sizeof(struct SysDesc), 1, head->fpdesc);
-
-	rewind(head->fpdesc);
-	fseek(head->fpdesc, head->desc.bitMapAddr, SEEK_SET);
-	fwrite(head->FreeSpace_bitMap, sizeof(char), head->desc.sizeBitMap, head->fpdesc);
-
-	for (int i = 0; i<SIZE_BUFF; i++) {
-		if (head->buff.map[i].isEdited == true) {
-			rewind(head->fpdesc);
-			fseek(head->fpdesc, head->desc.dataAddr + SIZE_PER_PAGE * head->buff.map[i].pageNo, SEEK_SET);
-			fwrite(head->buff.data[i], sizeof(char), SIZE_PER_PAGE, head->fpdesc);
-			head->buff.map[i].isEdited = false;
-		}
-	}
-	return 0;
-}
-
-struct employee{
-	long rid;
-	char name[100];
-	int age;
-	int weight;
-};
+#include "Test.h" 
 
 int main(int argc, char *argv[])
 {
 	//printf("hello");
 	Storage StorageManager;
-	dbSysHead dbhead; 
-	char filename[15] = "tinydb.mat";
-	StorageManager.init_database(&dbhead, filename);
-	StorageManager.show_SysDesc(&dbhead);
+	DbMetaHead dbhead; 
+	char fileName[15] = "tinydb.mat";
+	StorageManager.initDB(&dbhead, fileName);
+	StorageManager.showDbInfo(&dbhead);
 
 	StorageManager.fileOpt.deleteFile(&dbhead, 0);
 	StorageManager.pageOpt.recyAllPage(&dbhead);
-	StorageManager.show_SysDesc(&dbhead);
+	StorageManager.showDbInfo(&dbhead);
 
-	int fid = StorageManager.fileOpt.createFile(&dbhead, NORMAL_FILE, 1);
-	printf("创建文件%d成功！\n", fid); 
-	//int mapfid = StorageManager.fileOpt.createFile(&dbhead, MAP_FILE, 1);
+	int fileID = StorageManager.fileOpt.createFile(&dbhead, NORMAL_FILE, 1);
+	printf("创建文件%d成功！\n", fileID); 
+	//int mapfileID = StorageManager.fileOpt.createFile(&dbhead, MAP_FILE, 1);
 
-	sysUpdate(&dbhead);
-	StorageManager.show_SysDesc(&dbhead);
+	memToDisk(&dbhead);
+	StorageManager.showDbInfo(&dbhead);
 
-	//int fid = 0;
+	//int fileID = 0;
 	int num = 200;
 	for (int i = 0; i < num; i++) {
-		struct employee emp1 = { i, "abc", 30 + i, 5000 + i };
+		struct Student stu = { i, "abc", 30 + i, 5000 + i };
 		char str[1000];
-		sprintf(str, "%ld", emp1.rid);
-		strcat(str, emp1.name);
+		sprintf(str, "%ld", stu.rid);
+		strcat(str, stu.name);
 		printf("str: %s\n", str);
 		char tmp[100];
-		sprintf(tmp, "%d", emp1.age);
+		sprintf(tmp, "%d", stu.age);
 		strcat(str, tmp);
-		sprintf(tmp, "%d", emp1.weight);
+		sprintf(tmp, "%d", stu.weight);
 		printf("tmp: %s\n", tmp);
 		strcat(str, tmp);
 		printf("str: %s\n", str);
-		StorageManager.fileOpt.writeFile(&dbhead, fid, strlen(str), str);
+		StorageManager.fileOpt.writeFile(&dbhead, fileID, strlen(str), str);
 	}
 
 	char des[1000];
-	StorageManager.fileOpt.readFile(&dbhead, fid, des);
+	StorageManager.fileOpt.readFile(&dbhead, fileID, des);
 
-	sysUpdate(&dbhead);
-	StorageManager.show_SysDesc(&dbhead);
-	fclose(dbhead.fpdesc);
+	memToDisk(&dbhead);
+	StorageManager.showDbInfo(&dbhead);
+	fclose(dbhead.dataPath);
 	free(dbhead.FreeSpace_bitMap);
+
+	// 更改文件名
+	time_t tt = time(NULL);//这句返回的只是一个时间cuo
+	tm* t = localtime(&tt);
+	printf("%d-%02d-%02d %02d:%02d:%02d\n",
+		t->tm_year + 1900,
+		t->tm_mon + 1,
+		t->tm_mday,
+		t->tm_hour,
+		t->tm_min,
+		t->tm_sec); 
+	char time[50];
+	sprintf(time, "%d", t->tm_hour);
+	strcat(time, t->tm_min + "");
+	strcat(time, t->tm_sec + "");
+	strcat(time, ".mat");
+	rename(fileName, time);
 
 	return 0;
 }
-
