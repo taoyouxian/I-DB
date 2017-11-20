@@ -9,6 +9,7 @@
 #include <fstream>
 #include <time.h>
 #include <stdlib.h>
+#include <string.h>
 using namespace std; 
 
 // 常见配置参数

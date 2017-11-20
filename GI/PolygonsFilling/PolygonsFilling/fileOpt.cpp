@@ -231,7 +231,7 @@ void FileOpt::readFile(struct DbMetaHead *head, int fileID, char *des, MainWindo
 		mapNo = bufOpt.requestPage(head, pageNo);
 		memcpy(&ph, head->buff.data[mapNo], size_pageMateHead);
 
-		fout << "-------- Page Head Info-------\n" << endl;
+		fout << "-------- Page Head Info-------" << endl;
 		fout << "PageNo" << "\t" << ph.pageNo << endl;
 		fout << "PageFreePalce" << "\t" << ph.freeSpace << endl;
 		fout << "Record Stored in CurPage" << "\t" << ph.curRecordNum << endl;
@@ -286,7 +286,7 @@ void FileOpt::readFile(struct DbMetaHead *head, int fileID, char *des, MainWindo
 				string s1;
 				s1.append("Tiny DB> ");
 				s1.append(GetDate());
-				s1.append("\n-------- Page Head Info-------\n");
+				s1.append("\n-------- Page Head Info-------");
 				s1.append("\nPageNo\t");
 				s1.append(to_string(ph.pageNo));
 				s1.append("\n\freeSpace\t");

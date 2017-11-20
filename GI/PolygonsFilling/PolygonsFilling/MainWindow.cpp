@@ -291,11 +291,10 @@ void MainWindow::FreeData()
 void MainWindow::LoadData()
 {
 	std::vector<supplier*> suppliers;
-	fileOpt.LoadData(suppliers);
+	//fileOpt.LoadData(suppliers);
 	QString info = QString::fromLocal8Bit("¡¾") + "Loading Data Message Info" + QString::fromLocal8Bit("¡¿") + "\n- - - - - - - - - - - -\n\n";
 	this->tBrowser->setText(info);
-
-	for (int i = 0; i < suppliers.size(); i++) { 
+	/*for (int i = 0; i < suppliers.size(); i++) { 
 		struct supplier *s = suppliers[i];
 		char str[1000];
 		sprintf(str, "%ld", s->S_superkey);
@@ -319,6 +318,27 @@ void MainWindow::LoadData()
 			this->tBrowser->setText(info);
 		}
 		StorageManager.fileOpt.writeFile(&dbhead, fileID, strlen(str), str, this);
+	}*/
+	QString fileName = fileOpt.OpenFileDialog();
+	if (fileName.isNull()) {
+		;
+	}
+	else {
+		supplier *p = NULL;
+		string x;
+		vector<std::string> v;
+		ifstream fin(fileName.toStdString());
+		while (!fin.eof()) {
+			getline(fin, x);
+			char str[1000];
+			int j = 0;
+			for (int i = 0; i < x.length(); ++i){
+				if (x[i] != '|')
+					str[j++] = x[i];
+			}
+			StorageManager.fileOpt.writeFile(&dbhead, fileID, strlen(str), str, this);
+		}
+		fin.close();
 	}
 	QMessageBox::about(NULL, QString::fromLocal8Bit("Info"), QString::fromLocal8Bit("Data Loading is completed."));
 }

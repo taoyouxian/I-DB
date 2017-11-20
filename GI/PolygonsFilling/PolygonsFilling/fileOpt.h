@@ -46,9 +46,10 @@ public:
 
 	PageOpt pageOpt;
 	BufOpt bufOpt;
+	QString		OpenFileDialog();
 
 private:
-	QString		OpenFileDialog();
+	//QString		OpenFileDialog();
 	QString		SaveFileDialog();
 	vector<std::string>		InfoSplit(const string& s, const string& c);
 };
