@@ -16,18 +16,18 @@ int main() {
 	if (head.desc.fid_MapTable < 0){
 		int MapTable_fid = createFile(&head, MAP_FILE, 1);
 		head.desc.fid_MapTable = MapTable_fid;
-		printf("Create mapping file %d succeed.\n\n", MapTable_fid);
+		printf("Create mapping table %d successfully.\n\n", MapTable_fid);
 	}
 
 	if (head.desc.fid_DataDictionary < 0) {
 		int dataDict_fid = createFile(&head, DATA_DICTIONARY, 1);;
 		head.desc.fid_DataDictionary = dataDict_fid;
-		printf("Create data dict file %d succeed.\n\n", dataDict_fid);
+		printf("Create data dictionary file %d successfully.\n\n", dataDict_fid);
 	}
 
 	int employee_dictID = createTable_employee(&head);
 	if (employee_dictID < 0){
-		printf("Create table employee failed.\n");
+		printf("Failed to create table employee.\n");
 		exit(0);
 	}
 
@@ -193,5 +193,7 @@ int main() {
 	char time[100];
 	changeTime(time, ".mat");
 	rename(filename, time);
+
+	system("pause");
 	return 0;
 }

@@ -172,7 +172,7 @@ void writeFile(struct dbSysHead *head, int dictID, char *str){
 
 	int fid = head->data_dict[dictID].fileID;
 	if (fid < 0) {
-		printf("数据库中不存在文件号为%d的文件.\n", fid);
+		printf("The file number %d does not exist in the database.\n", fid);
 		return;
 	}
 	long PageNum = head->desc.fileDesc[fid].filePageNum;
@@ -266,7 +266,7 @@ void writeFile(struct dbSysHead *head, int dictID, char *str){
 void readFile(struct dbSysHead *head, int dictID){
 	int fid = head->data_dict[dictID].fileID;
 	if (fid < 0) {
-		printf("数据库中不存在文件号为%d的文件.\n", fid);
+		printf("The file number %d does not exist in the database.\n", fid);
 		return;
 	}
 	int type = head->desc.fileDesc[fid].fileType;
@@ -325,7 +325,7 @@ void readFile(struct dbSysHead *head, int dictID){
 void writeFile(struct dbSysHead *head, int dictID){
 	int fid = head->data_dict[dictID].fileID;
 	if (fid < 0) {
-		printf("数据库中不存在文件号为%d的文件.\n", fid);
+		printf("The file number %d does not exist in the database.\n", fid);
 		return;
 	}
 	int type = head->desc.fileDesc[fid].fileType;

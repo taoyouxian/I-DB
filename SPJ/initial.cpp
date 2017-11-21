@@ -103,7 +103,7 @@ void init_database(struct dbSysHead *head, char *filename){
 int readDataDictionaryFile(struct dbSysHead *head) {
 	int fid = head->desc.fid_DataDictionary;
 	if (fid < 0) {
-		printf("数据字典文件不存在！");
+		printf("Data dictionary file does not exist.");
 		return 0;
 	}
 	long pageNo = head->desc.fileDesc[fid].fileFirstPageNo;
@@ -122,6 +122,6 @@ int readDataDictionaryFile(struct dbSysHead *head) {
 		else
 			pageNo = ph.nextPageNo;
 	}
-	printf("Read the exist schemas in current database successfully.\n");
+	printf("Read the exist schema in current database successfully.\n");
 	return count;
 }

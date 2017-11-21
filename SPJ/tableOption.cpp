@@ -4,11 +4,11 @@
 int createTable_employee(struct dbSysHead *head) {
 	int fid = createFile(head, USER_FILE, 1);
 	if (fid < 0){
-		printf("创建用户文件失败！");
+		printf("Failed to create user file.");
 		return  -1;
 	}
 	else
-		printf("创建用户文件%d成功！\n\n", fid);
+		printf("Create user file %d successfully.\n\n", fid);
 
 	if (fid < 0) {
 		printf("数据库中不存在文件号为%d的文件！\n", fid);
