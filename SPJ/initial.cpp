@@ -53,10 +53,10 @@ void creatSysHead(char *filename){
 }
 
 void init_database(struct dbSysHead *head, char *filename){
-	printf("\n正在初始化数据库...\n");
+	printf("\nInit database...\n");
 	FILE *fp = fopen(filename, "rb");
 	if (fp == NULL){
-		printf("数据库文件不存在，开始创建数据库...\n");
+		printf("database not exist, start to create database...\n");
 		creatSysHead(filename);
 		fp = fopen(filename, "rb");
 	}
@@ -97,7 +97,7 @@ void init_database(struct dbSysHead *head, char *filename){
 		memset(&head->data_dict[i], 0, sizeof(Relation));
 		head->data_dict[i].fileID = -1;
 	}
-	printf("成功完成初始化！\n");
+	printf("Init database successfully.\n");
 }
 
 int readDataDictionaryFile(struct dbSysHead *head) {
@@ -122,6 +122,6 @@ int readDataDictionaryFile(struct dbSysHead *head) {
 		else
 			pageNo = ph.nextPageNo;
 	}
-	printf("成功读取当前数据库中已有的表模式！\n");
+	printf("Read the exist schemas in current database successfully.\n");
 	return count;
 }

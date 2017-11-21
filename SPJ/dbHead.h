@@ -42,13 +42,15 @@
 //属性的类型
 #define INT_TYPE        1
 #define CHAR_TYPE       2
-#define DATE_TYPE       3
+#define VARCHAR_TYPE       3
+#define DATE_TYPE       4
+#define FLOAT_TYPE       5
+#define DOUBLE_TYPE       6
 
 #define NAME_MAX_LENGTH 32
 #define ATTRIBUTE_NUM   12
 
 #define BUCKET_NUM      10
-
 
 #include <string.h>
 #include <stdlib.h>
@@ -68,8 +70,14 @@ struct department{
 	int manager_id;     //部门经理职工号
 	int num;            //部门总人数
 	char dname[20];     //部门名字
+	char idcard[18];    //部门经理身份证
 };
 
+struct birthday{
+	char idcard[18];    //部门经理身份证
+	char birthtime[15];    //部门经理出生时间
+	int addressid;    //部门经理出生地址, 表示出生地址数组中的下标
+};
 
 struct dbMapTable {
 	bool isdeleted;
@@ -201,12 +209,14 @@ void show_FileDesc(struct dbSysHead *head, int fid);
 void show_MapTableFile(struct dbSysHead *head, int fid);
 void welcome();
 void exitdb();
+void changeTime(char *target, char *type);
 
 //fileOption.cpp
 int createFile(struct dbSysHead *head, int type, long reqPageNum);
 struct pageHead extendFile(struct dbSysHead *head, int fid, struct pageHead *preph);
 void writeFile(struct dbSysHead *head, int dictID, char *str);
 void readFile(struct dbSysHead *head, int dictID);
+void writeFile(struct dbSysHead *head, int dictID);
 
 //buffManage.cpp
 int queryPage(struct dbSysHead *head, long queryPageNo);
@@ -231,6 +241,7 @@ long getNextRecord(struct dbSysHead *head, int mapNo, int recordNo, char *des);
 //tableOption.cpp
 int createTable_employee(struct dbSysHead *head);
 int createTable_department(struct dbSysHead *head);
+int createTable_birthday(struct dbSysHead *head);
 //void dropTable(struct dbSysHead *head, char* tableName);
 
 //select.cpp
@@ -243,6 +254,8 @@ int getValueByAttrID(char *str, int index, char *result);
 
 //join.cpp
 int nestedLoopJoin(struct dbSysHead *head, int employee_dictID, int department_dictID);
+int nestedLoopJoinByConds(struct dbSysHead *head, int employee_dictID, int department_dictID, char* attribute_name, char* value, int like);
+int nestedLoopJoinByThree(struct dbSysHead *head, int employee_dictID, int department_dictID, int birthday_dictID);
 int SortJoin(struct dbSysHead *head, int employee_dictID, int department_dictID);
 int HashJoin(struct dbSysHead *head, int employee_dictID, int department_dictID);
 
@@ -250,6 +263,7 @@ int HashJoin(struct dbSysHead *head, int employee_dictID, int department_dictID)
 //tmpTable.cpp
 int createTmpTable(struct dbSysHead *head, Relation original_rl);
 int createTmpTable2(struct dbSysHead *head, Relation r1, Relation r2, int r1_puc_attr, int r2_puc_attr);
+int createTmpTable3(struct dbSysHead *head, Relation r1, Relation r2, Relation r3, int r1_pub_attr, int r2_pub_attr, int r3_pub_attr);
 int createTmpTableAfterSort(struct dbSysHead *head, Relation rl, int pub_attr);
 void HashRelation(struct dbSysHead *head, Relation rl, int pub_attr, multimap<int, long> *m);
 int insertOneRecord(struct dbSysHead *head, int tmp_table_dictID, char* record);
@@ -260,5 +274,6 @@ int sysUpdate(struct dbSysHead *head);
 void close_database(struct dbSysHead* head);
 void deleteFile(struct dbSysHead *head, int fid);
 void deleteDataDict(struct dbSysHead *head, int fid);
+
 
 #endif /* dbHead_h */

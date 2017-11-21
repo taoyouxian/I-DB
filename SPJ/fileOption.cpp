@@ -3,11 +3,11 @@
 //直接进行磁盘操作，不用buff
 int createFile(struct dbSysHead *head, int type, long reqPageNum){
 	if (head->desc.curFileNum >= MAX_FILE_NUM){
-		printf("创建文件失败！当前数据库已创建了%d个文件，达到最大值。\n", MAX_FILE_NUM);
+		printf("创建文件失败.当前数据库已创建了%d个文件，达到最大值。\n", MAX_FILE_NUM);
 		exit(0);
 	}
 	if (head->desc.AvaiPage < reqPageNum){
-		printf("创建文件失败！当前数据库可用页数为%ld，无法满足该文件请求的页数%ld。\n", head->desc.AvaiPage, reqPageNum);
+		printf("创建文件失败.当前数据库可用页数为%ld，无法满足该文件请求的页数%ld。\n", head->desc.AvaiPage, reqPageNum);
 		exit(0);
 	}
 	//找到fileDesc中第一个可用的下标号
@@ -53,7 +53,7 @@ int createFile(struct dbSysHead *head, int type, long reqPageNum){
 		head->desc.fileDesc[fid].filePageNum = reqPageNum;
 	}
 	else {
-		printf("创建文件失败！没有足够的连续空间。\n");
+		printf("创建文件失败.没有足够的连续空间。\n");
 		exit(0);
 	}
 	return fid;
@@ -89,7 +89,7 @@ struct pageHead extendFile(struct dbSysHead *head, int fid, struct pageHead *pre
 
 		return ph;
 	}
-	printf("扩展文件空间失败！\n");
+	printf("扩展文件空间失败.\n");
 	exit(0);
 }
 
@@ -100,7 +100,7 @@ void insertIntoMapFile(struct dbSysHead *head, struct dbMapTable mt, long logicI
 	long pos = logicID - num * page;
 	int fid = head->desc.fid_MapTable;
 	if (fid < 0) {
-		printf("数据库中不存在映射表文件！\n");
+		printf("数据库中不存在映射表文件.\n");
 		return;
 	}
 	long curPageNo = head->desc.fileDesc[fid].fileFirstPageNo;
@@ -138,7 +138,7 @@ void insertIntoMapFile(struct dbSysHead *head, struct dbMapTable mt, long logicI
 		//向映射表的新页中插入一条表项
 		memcpy(head->buff.data[mapNo] + SIZE_PAGEHEAD, &mt, size_maptable);
 		head->buff.map[mapNo].isEdited = true;
-		head->buff.map[mapNo].isPin = true; //新分配的页，也pin到缓冲区中！
+		head->buff.map[mapNo].isPin = true; //新分配的页，也pin到缓冲区中.
 	}
 	//本页末尾还有空间，直接在最后面添加即可
 	else if (page == filepagenum - 1 && pos == PHead.curRecordNum && PHead.freeSpace >= size_maptable) {
@@ -162,7 +162,7 @@ void insertIntoMapFile(struct dbSysHead *head, struct dbMapTable mt, long logicI
 void writeFile(struct dbSysHead *head, int dictID, char *str){
 	long logicID = allocateLogicID(head);
 	if (logicID == ALLO_FAIL){
-		printf("分配逻辑号失败！\n");
+		printf("分配逻辑号失败.\n");
 		exit(0);
 	}
 	//映射表文件中的一条表项
@@ -172,7 +172,7 @@ void writeFile(struct dbSysHead *head, int dictID, char *str){
 
 	int fid = head->data_dict[dictID].fileID;
 	if (fid < 0) {
-		printf("数据库中不存在文件号为%d的文件！\n", fid);
+		printf("数据库中不存在文件号为%d的文件.\n", fid);
 		return;
 	}
 	long PageNum = head->desc.fileDesc[fid].filePageNum;
@@ -266,7 +266,7 @@ void writeFile(struct dbSysHead *head, int dictID, char *str){
 void readFile(struct dbSysHead *head, int dictID){
 	int fid = head->data_dict[dictID].fileID;
 	if (fid < 0) {
-		printf("数据库中不存在文件号为%d的文件！\n", fid);
+		printf("数据库中不存在文件号为%d的文件.\n", fid);
 		return;
 	}
 	int type = head->desc.fileDesc[fid].fileType;
@@ -274,7 +274,7 @@ void readFile(struct dbSysHead *head, int dictID){
 		show_Relation(head, dictID);
 	}
 	else if (type == TMP_TABLE){
-		printf("\n这是临时表！\n");
+		printf("\nThis a temporary tables.\n");
 	}
 	long pageNum = head->desc.fileDesc[fid].filePageNum;
 	long pageNo = head->desc.fileDesc[fid].fileFirstPageNo;
@@ -286,11 +286,17 @@ void readFile(struct dbSysHead *head, int dictID){
 		mapNo = reqPage(head, pageNo);
 		memcpy(&ph, head->buff.data[mapNo], SIZE_PAGEHEAD);
 
-		printf("\n--------页头信息-------\n");
+		cout << "-------- Page Head Info -------" << endl;
+		cout << "PageNo" << "\t" << ph.pageNo << endl;
+		cout << "PageFreePalce" << "\t" << ph.freeSpace << endl;
+		cout << "RecordNum Stored in CurPage" << "\t" << ph.curRecordNum << endl;
+		cout << "Offset Table ----- Record Content" << endl;
+		cout << "LogicID" << "\t" << "RecordNo" << "\t" << "Offset" << "\t" << "IsDelete" << "\t" << "Record Content" << endl;
+		/*printf("\n--------页头信息-------\n");
 		printf("页号：%ld\n", ph.pageNo);
 		printf("页的空余空间：%ld\n", ph.freeSpace);
 		printf("该页当前存储的记录个数：%d\n", ph.curRecordNum);
-		printf("逻辑号|记录号|偏移量|是否删除|记录内容\n");
+		printf("逻辑号|记录号|偏移量|是否删除|记录内容\n");*/
 
 		memcpy(&preOffset, head->buff.data[mapNo] + SIZE_PAGEHEAD, SIZE_OFFSET);
 		int readLength = 0;
@@ -314,4 +320,72 @@ void readFile(struct dbSysHead *head, int dictID){
 		else
 			pageNo = ph.nextPageNo;
 	}
+}
+
+void writeFile(struct dbSysHead *head, int dictID){
+	int fid = head->data_dict[dictID].fileID;
+	if (fid < 0) {
+		printf("数据库中不存在文件号为%d的文件.\n", fid);
+		return;
+	}
+	int type = head->desc.fileDesc[fid].fileType;
+	if (type == USER_FILE){
+		show_Relation(head, dictID);
+	}
+	else if (type == TMP_TABLE){
+		printf("\nThis a temporary table outputed. \n");
+	}
+	long pageNum = head->desc.fileDesc[fid].filePageNum;
+	long pageNo = head->desc.fileDesc[fid].fileFirstPageNo;
+	struct pageHead ph;
+	struct offsetInPage curOffset, preOffset;
+	int mapNo = -1;
+
+	char fileName[100];
+	changeTime(fileName, ".csv");
+	printf("CSV Path: %s. \n", fileName);
+	ofstream fout(fileName);
+	for (int i = 0; i < pageNum; i++){
+		mapNo = reqPage(head, pageNo);
+		memcpy(&ph, head->buff.data[mapNo], SIZE_PAGEHEAD);
+
+		fout << "-------- Page Head Info -------" << endl;
+		fout << "PageNo" << "\t" << ph.pageNo << endl;
+		fout << "PageFreePalce" << "\t" << ph.freeSpace << endl;
+		fout << "RecordNum Stored in CurPage" << "\t" << ph.curRecordNum << endl;
+		fout << "Offset Table ----- Record Content" << endl;
+		fout << "LogicID" << "\t" << "RecordNo" << "\t" << "Offset" << "\t" << "IsDelete" << "\t" << "Record Content" << endl;
+
+		/*printf("\n--------页头信息-------\n");
+		printf("页号：%ld\n", ph.pageNo);
+		printf("页的空余空间：%ld\n", ph.freeSpace);
+		printf("该页当前存储的记录个数：%d\n", ph.curRecordNum);
+		printf("逻辑号|记录号|偏移量|是否删除|记录内容\n");*/
+
+		memcpy(&preOffset, head->buff.data[mapNo] + SIZE_PAGEHEAD, SIZE_OFFSET);
+		int readLength = 0;
+
+		for (int j = 0; j < ph.curRecordNum; j++) {
+			memcpy(&curOffset, head->buff.data[mapNo] + SIZE_PAGEHEAD + SIZE_OFFSET * j, SIZE_OFFSET);
+			//printf("%ld\t%d\t%d\t%d\t", curOffset.logicID, curOffset.recordID, curOffset.offset, curOffset.isDeleted);
+			fout << curOffset.logicID << "\t" << curOffset.recordID << "\t" << curOffset.offset << "\t" << curOffset.isDeleted << "\t";
+
+			if (j == 0)
+				readLength = curOffset.offset;
+			else
+				readLength = curOffset.offset - preOffset.offset;
+			char *des = (char*)malloc(readLength);
+			memset(des, 0, readLength);
+			memcpy(des, head->buff.data[mapNo] + SIZE_PER_PAGE - curOffset.offset, readLength);
+			des[readLength] = '\0';
+			//printf("%s\n", des);
+			fout << des << endl;
+			preOffset = curOffset;
+		}
+		if (ph.nextPageNo < 0)
+			break;
+		else
+			pageNo = ph.nextPageNo;
+	}
+	fout << "-------- Page End -------" << endl;
 }

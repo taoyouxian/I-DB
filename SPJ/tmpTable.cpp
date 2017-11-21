@@ -56,6 +56,51 @@ int createTmpTable2(struct dbSysHead *head, Relation r1, Relation r2, int r1_pub
 	return dictID;
 }
 
+int createTmpTable3(struct dbSysHead *head, Relation r1, Relation r2, Relation r3, int r1_pub_attr, int r2_pub_attr, int r3_pub_attr){
+	int fid = createFile(head, TMP_TABLE, 1);
+	int dictID = -1;
+	for (int i = 0; i < MAX_FILE_NUM; i++) {
+		if (head->data_dict[i].fileID < 0 && head->data_dict[i].attributeNum == 0){
+			//先把r1完全赋给 head->data_dict[i]
+			head->data_dict[i] = r1;
+			head->data_dict[i].fileID = fid;
+			strcat(head->data_dict[i].relationName, "_");
+			strcat(head->data_dict[i].relationName, r2.relationName);
+			strcat(head->data_dict[i].relationName, "_");
+			strcat(head->data_dict[i].relationName, r3.relationName);
+			strcat(head->data_dict[i].relationName, "_tmp");
+			head->data_dict[i].attributeNum = r1.attributeNum + r2.attributeNum + r3.attributeNum - 1;
+			int j = r1.attributeNum;
+			for (int k = 0; k < r2.attributeNum; k++) {
+				if (k != r2_pub_attr){
+					head->data_dict[i].atb[j] = r2.atb[k];
+					head->data_dict[i].isIndexed[j] = r2.isIndexed[k];
+					head->data_dict[i].isOrdered[j] = r2.isOrdered[k];
+					j++;
+				}
+			}
+			for (int k = 0; k < r3.attributeNum; k++) {
+				if (k != r3_pub_attr){
+					head->data_dict[i].atb[j] = r3.atb[k];
+					head->data_dict[i].isIndexed[j] = r3.isIndexed[k];
+					head->data_dict[i].isOrdered[j] = r3.isOrdered[k];
+					j++;
+				}
+			}
+
+			head->data_dict[i].recordNum = 0;
+			head->data_dict[i].recordLength = r1.recordLength + r2.recordLength + r3.recordLength - r1.atb[r1_pub_attr].getLength() - r2.atb[r2_pub_attr].getLength();
+
+			dictID = i;
+			break;
+		}
+	}
+	if (dictID < 0) {
+		printf("当前数据库中已存在过多的关系，无法创建新关系！\n");
+		return  -1;
+	}
+	return dictID;
+}
 bool isExisted(int *arr, int map, long length){
 	for (int i = 0; i < length; i++) {
 		if (arr[i] == map)
