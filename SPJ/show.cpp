@@ -36,7 +36,7 @@ void show_FileDesc(struct dbSysHead *head, int dictID) {
 	long pageNo = head->desc.fileDesc[fid].fileFirstPageNo;
 	int type = head->desc.fileDesc[fid].fileType;
 	printf("\n**************************************************\n");
-	printf("File Type:");
+	printf("File Type: ");
 	if (type == MAP_FILE)
 		printf("Mapping file\n");
 	else if (type == USER_FILE){

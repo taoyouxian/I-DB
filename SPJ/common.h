@@ -9,9 +9,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <cstring>
+#include <algorithm>
 #include <vector> 
 #include <fstream>
 #include <map>
+#include "Test.h"
 using namespace std;
 
 #define PATH "H:\\SelfLearning\\SAI\\Course\\tinydbms\\SPJAlgorithm\\"
@@ -55,8 +57,9 @@ using namespace std;
 #define CHAR_TYPE       2
 #define VARCHAR_TYPE       3
 #define DATE_TYPE       4
-#define FLOAT_TYPE       5
-#define DOUBLE_TYPE       6
+#define LONG_TYPE       5
+#define FLOAT_TYPE       6
+#define DOUBLE_TYPE       7
 
 #define NAME_MAX_LENGTH 32
 #define ATTRIBUTE_NUM   12

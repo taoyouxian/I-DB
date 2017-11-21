@@ -1,4 +1,5 @@
 ﻿#include "dbHead.h"
+#include <sstream>
 void changeTime(char *time);
 
 int main() {
@@ -24,8 +25,10 @@ int main() {
 		head.desc.fid_DataDictionary = dataDict_fid;
 		printf("Create data dictionary file %d successfully.\n\n", dataDict_fid);
 	}
-
-	int employee_dictID = createTable_employee(&head);
+	
+	string sql = "create table employee(rid INT(11), did INT, rname VARCHAR(20), age INT, PRIMARY KEY(rid))";
+	//int employee_dictID = createTable_employee(&head);
+	int employee_dictID = createTable_employee(&head, sql);
 	if (employee_dictID < 0){
 		printf("Failed to create table employee.\n");
 		exit(0);
@@ -57,8 +60,6 @@ int main() {
 	}
 
 	show_FileDesc(&head, employee_dictID);
-
-	employee_dictID = 0;
 	readFile(&head, employee_dictID);
 
 	show_MapTableFile(&head, head.desc.fid_MapTable);
@@ -68,7 +69,7 @@ int main() {
 	for (int i = 0; i < 10; i++) {
 		if (queryRecordByLogicID(&head, i * 15, des) < 0)
 			continue;
-		printf("LogicID%d's content: %s\n", i * 15, des);
+		printf("LogicID %d's content: %s\n", i * 15, des);
 	}
 
 	// 等值选择
@@ -186,6 +187,44 @@ int main() {
 
 	// 导出csv
 	writeFile(&head, j5);
+
+	// 创建表supplier
+	int supplier_dictID = createTable_supplier(&head);
+	if (supplier_dictID < 0){
+		printf("Create table supplier failed.\n");
+		exit(0);
+	}
+	char str[1000];
+	ifstream fin("H:\\SelfLearning\\SAI\\Course\\tinydbms\\SPJAlgorithm\\supplier.tbl");
+	while (!fin.eof())
+	{
+		string line;
+		getline(fin, line);
+		strcpy(str, line.c_str());
+		writeFile(&head, supplier_dictID, str);
+	}
+	show_FileDesc(&head, supplier_dictID);
+	//readFile(&head, supplier_dictID);
+
+	// 创建表partsupp
+	int partsupp_dictID = createTable_partsupp(&head);
+	if (partsupp_dictID < 0){
+		printf("Create table partsupp failed.\n");
+		exit(0);
+	}
+	ifstream fin2("H:\\SelfLearning\\SAI\\Course\\tinydbms\\SPJAlgorithm\\partsupp.tbl");
+	while (!fin2.eof())
+	{
+		string line;
+		getline(fin2, line);
+		strcpy(str, line.c_str());
+		writeFile(&head, partsupp_dictID, str);
+	}
+	show_FileDesc(&head, partsupp_dictID);
+	//readFile(&head, partsupp_dictID);
+
+	int s3 = tableScanRangeSelector(&head, supplier_dictID, "S_superkey", "10", "20");
+	readFile(&head, s3);
 
 	close_database(&head);
 

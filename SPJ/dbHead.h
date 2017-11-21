@@ -165,8 +165,11 @@ long getNextRecord(struct dbSysHead *head, int mapNo, int recordNo, char *des);
 
 //tableOption.cpp
 int createTable_employee(struct dbSysHead *head);
+int createTable_employee(struct dbSysHead *head, string sql);
 int createTable_department(struct dbSysHead *head);
 int createTable_birthday(struct dbSysHead *head);
+int createTable_supplier(struct dbSysHead *head);
+int createTable_partsupp(struct dbSysHead *head);
 //void dropTable(struct dbSysHead *head, char* tableName);
 
 //select.cpp
@@ -199,6 +202,9 @@ int sysUpdate(struct dbSysHead *head);
 void close_database(struct dbSysHead* head);
 void deleteFile(struct dbSysHead *head, int fid);
 void deleteDataDict(struct dbSysHead *head, int fid);
+
+//sqlUtil.cpp
+void createSql(string sql_str, string& table_name, map<string, pair<int, int> >& paras_map);
 
 
 #endif /* dbHead_h */
