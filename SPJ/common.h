@@ -16,7 +16,7 @@
 #include "Test.h"
 using namespace std;
 
-#define PATH "H:\\SelfLearning\\SAI\\Course\\tinydbms\\SPJAlgorithm\\"
+#define PATH "H:\\SelfLearning\\SAI\\Course\\tinydbms\\QueryAccess\\"
 
 #define MAX_FILE_NUM 64
 #define MAX_LOGICID_NUM 1024000
