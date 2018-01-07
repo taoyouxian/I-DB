@@ -1,19 +1,7 @@
-#include "bufOpt.h"
-#include "storage.h"
-
-
-BufOpt::BufOpt()
-{
-}
-
-
-BufOpt::~BufOpt()
-{
-}
-
+#include "dbHead.h"
 
 //查询一页是否在缓冲区中，若在，则返回它在缓冲区中的下标
-int BufOpt::queryPage(struct dbSysHead *head, long queryPageNo){
+int queryPage(struct dbSysHead *head, long queryPageNo){
 	for (int i = 0; i < SIZE_BUFF; i++) {
 		if ((head->buff).map[i].pageNo == queryPageNo) {
 			return i;
@@ -23,7 +11,7 @@ int BufOpt::queryPage(struct dbSysHead *head, long queryPageNo){
 }
 
 //将下标为mapNo的缓冲区块 替换为 页号为pageNo的页
-void BufOpt::replacePage(struct dbSysHead *head, int mapNo, long pageNo){
+void replacePage(struct dbSysHead *head, int mapNo, long pageNo){
 	//该缓冲区块已被编辑，需要写回磁盘中
 	if ((head->buff).map[mapNo].isEdited == true) {
 		rewind(head->fpdesc);
@@ -39,7 +27,7 @@ void BufOpt::replacePage(struct dbSysHead *head, int mapNo, long pageNo){
 }
 
 //调度算法，替换出最久没有使用的缓冲区块，返回下标号
-int BufOpt::schedulingBuffer(struct dbSysHead *head){
+int scheBuff(struct dbSysHead *head){
 	int min = 0;
 	for (int i = 0; i < SIZE_BUFF; i++){
 		//该缓冲区块空闲，可直接分配
@@ -59,11 +47,11 @@ int BufOpt::schedulingBuffer(struct dbSysHead *head){
 
 
 //请求读写一个页，若该页不在缓冲区中，则调用替换算法把该页调到缓冲区中，返回该页在缓冲区中的下标
-int BufOpt::reqPage(struct dbSysHead *head, long queryPageNo){
+int reqPage(struct dbSysHead *head, long queryPageNo){
 	int mapNo = queryPage(head, queryPageNo);
 	//若不在缓冲区内，则调度，找一块替换
 	if (mapNo == BUFF_NOT_HIT) {
-		mapNo = schedulingBuffer(head);
+		mapNo = scheBuff(head);
 		replacePage(head, mapNo, queryPageNo);
 	}
 	head->buff.curTimeStamp++;

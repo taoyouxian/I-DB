@@ -1,4 +1,4 @@
-#include "glwidget.h"
+﻿#include "glwidget.h"
 #include"MainWindow.h"
 #include <QtWidgets/QApplication>
 

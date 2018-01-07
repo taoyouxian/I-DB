@@ -3,8 +3,11 @@
 #define MAINWINDOW_H
 
 #include <QtWidgets\QMainWindow>
+#include <memory>
 #include "ui_glwidget.h"
+#include "ui_table.h" 
 #include "storage.h" 
+#include "Table.h"
 
 #include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
@@ -23,10 +26,16 @@ class MainWindow : public QMainWindow
     
 public:
     MainWindow(QWidget *parent = 0);
-	~MainWindow();  
+	~MainWindow();
+
+signals:
+	void SGNewTable();
+
+private: 
+	shared_ptr<Table>			m_QtableWin;			//	新建窗口
 
 private:
-	Ui::GLWidgetClass ui; 
+	Ui::GLWidgetClass ui;
 	 
     QWidget *centralWidget;
     GLWidget *glWidget;
@@ -47,11 +56,11 @@ public:
 	QToolBar	*m_pOpenFileToolBar;		// 打开文件
 	QAction		*m_pOpenFileAction;	 
 
-	QToolBar	*m_pDeleteToolBar;			// 清除面板
-	QAction		*m_pDeleteAction;
+	QToolBar	*m_pNewToolBar;			// NewTable
+	QAction		*m_pNewAction;
 
-	QToolBar	*m_pCreateToolBar;			// 填充多边形
-	QAction		*m_pCreateAction;
+	QToolBar	*m_pQueryToolBar;			// Query
+	QAction		*m_pQueryAction;
 
 	QToolBar	*m_pInitToolBar;			// InitDB
 	QAction		*m_pInitAction;
@@ -69,15 +78,21 @@ public:
 	QAction		*m_pLoadDataAction;
 	QToolBar	*m_pBackupToolBar;			// Backup
 	QAction		*m_pBackupAction; 
-	QToolBar	*m_pFreeToolBar;			// Free
-	QAction		*m_pFreeAction;
+	QToolBar	*m_pFileDescToolBar;			// Free
+	QAction		*m_pFileDescAction;
 
 
 	QTextBrowser		*sysBrowser;
-	QTextBrowser		*showBrowser; 
+	QTextBrowser		*sysTables;
+	QTextBrowser		*showBrowser;
 	QTextBrowser		*tBrowser;
+	QTextBrowser		*tQuery;
+	QTextEdit		*sqlText;
+	QTextEdit		*loadText;
 	QLineEdit		*searchText;
 
+	QPushButton		*queryBtn;
+	QPushButton		*loadBtn;
 	QPushButton		*searchBtn;
 	QPushButton		*initBtn;
 	QPushButton		*delBtn;
@@ -87,14 +102,16 @@ public:
 	QPushButton		*backupBtn;
 	QPushButton		*loadDataBtn;
 
+
+	QTableWidget		*tableWidget;
+
 /**槽函数**/ 
 public:
 	// 文件读取
 	void	ReadFiletoPoints();
-	// 填充多边形
-	void	CreateGLWidget();
-	// 清除面板
-	void	DeleteGLWidget();
+	void	NewTable();
+	void	BacktoMain();
+	void	Query();
 	// 文件写入
 	void	SavePolyAsFile();
 
@@ -106,15 +123,24 @@ public:
 	void	ShowDBInfo();
 	void	LoadData();
 	void	Backup();
-	void	FreeData();
+	void	ShowFileDesc();
 	// 按照页号来检索内容
 	void SearchByPageNo();
-	 
+	void QueryBySQL();
+	void LoadByTableName();
+
 	FileOpt fileOpt;
-	 
 	Storage StorageManager;
-	DbMetaHead dbhead;
+	dbSysHead dbhead;
+
+	int supplier_dictID;
+	int partsupp_dictID;
+
 	char fileName[15];
+
+	string fileLog;
+	string welcomeLog;
+
 	int INFO_NUM = 0; 
 	int fileID;
 };

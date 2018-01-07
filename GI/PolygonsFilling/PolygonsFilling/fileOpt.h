@@ -4,9 +4,7 @@
 #define FILEOPT_H_INCLUDED
 
 #include "common.h"
-#include "pageOpt.h"
 #include "segmentOpt.h"
-#include "bufOpt.h"
 #include "Test.h"
  
 #include <vector>
@@ -14,14 +12,12 @@
 
 /* (文件信息)
 */
-struct FileInfo{
-	int fileType;                // 标识是否为索引文件，以及索引文件的类型（hash/b树/顺序,线性）
-	int fileID;                  // 文件号
-	int fileName;                // 文件名
-	int fileState;                // 文件状态
-	int fileSegNum;              // 文件占用了多少段
-	struct Segment segTable[SEG_NUM];		//	定义段数量
-}; 
+struct FileDesc{
+	int fileType;                  //标识文件类型
+	//int fileID;                    //文件号
+	long fileFirstPageNo;
+	long filePageNum;              //文件占用了多少页
+};
 
 class MainWindow;
 
@@ -37,15 +33,20 @@ public:
 	void		LoadData(std::vector<supplier*> &suppliers);	//  LoadData
 
 
-	int createFile(struct DbMetaHead *head, int type, long requestPageNum, MainWindow* ui);
-	void readFile(struct DbMetaHead *head, int fileID, char *des, MainWindow* ui);
-	void readFile(struct DbMetaHead *head, int fileID, char *des, MainWindow* ui, int pageNo);
-	void writeFile(struct DbMetaHead *head, int fileID, int length, char *str, MainWindow* ui);
-	void deleteFile(struct DbMetaHead *head, int fileID, MainWindow* ui);
-	int queryFileByIndex(struct DbMetaHead *head, int fileID, MainWindow* ui);
+	int createFile(struct dbSysHead *head, int type, long requestPageNum, MainWindow* ui);
+	int createFile(struct dbSysHead *head, int type, long requestPageNum);
+	//void readFile(struct dbSysHead *head, int fileID, char *des, MainWindow* ui);
+	//void readFile(struct dbSysHead *head, int fileID, char *des, MainWindow* ui, int pageNo);
+	//void writeFile(struct dbSysHead *head, int fileID, char *str, MainWindow* ui);
+	void deleteFile(struct dbSysHead *head, int fileID, MainWindow* ui);
+	int queryFileByIndex(struct dbSysHead *head, int fileID, MainWindow* ui); 
 
-	PageOpt pageOpt;
-	BufOpt bufOpt;
+	struct pageHead extendFile(struct dbSysHead *head, int fid, struct pageHead *preph);
+	void writeFile(struct dbSysHead *head, int dictID, char *str, MainWindow* ui);
+	void readFile(struct dbSysHead *head, int dictID, char* attribute_name, MainWindow* ui);
+	void writeFile(struct dbSysHead *head, int dictID, MainWindow* ui);
+	void insertIntoMapFile(struct dbSysHead *head, struct dbMapTable mt, long logicID);
+
 	QString		OpenFileDialog();
 
 private:

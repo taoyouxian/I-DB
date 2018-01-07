@@ -1,15 +1,4 @@
-#include "pageOpt.h"
-#include "storage.h"
-
-
-PageOpt::PageOpt()
-{
-}
-
-
-PageOpt::~PageOpt()
-{
-}
+#include "dbHead.h"
 
 
 /**
@@ -21,7 +10,7 @@ PageOpt::~PageOpt()
 * @retval  返回值为0或1
 *
 **/
-int PageOpt::getBit(unsigned long num, long pos) {
+int getBit(unsigned long num, long pos) {
 	unsigned long result = 0x00000001;
 	result = result << (32 - pos);
 	result = result & num;
@@ -42,7 +31,7 @@ int PageOpt::getBit(unsigned long num, long pos) {
 * @return  int
 *
 **/
-int PageOpt::setBit(unsigned long *num, long pos, int setValue){
+int setBit(unsigned long *num, long pos, int setValue){
 	unsigned long result;
 
 	if (setValue != 1 && setValue != 0) {
@@ -65,7 +54,7 @@ int PageOpt::setBit(unsigned long *num, long pos, int setValue){
 }
 
 // 分配页
-long PageOpt::allocatePage(struct dbSysHead *head, long reqPageNum){
+long allocatePage(struct dbSysHead *head, long reqPageNum){
 	if (head->desc.AvaiPage == 0){
 		printf("分配页空间失败！当前该数据库暂无可用空闲页\n");
 		exit(0);
@@ -112,13 +101,13 @@ long PageOpt::allocatePage(struct dbSysHead *head, long reqPageNum){
 }
 
 //回收一页
-void PageOpt::recyOnePage(struct dbSysHead *head, long pageNo) {
+void recyOnePage(struct dbSysHead *head, long pageNo) {
 	long page = pageNo / (sizeof(long) * 8);
 	long pos = pageNo - page * 8 * sizeof(long) + 1;
 	setBit(head->FreeSpace_bitMap + page, pos, PAGE_AVAI);
 }
 
-void PageOpt::recyAllPage(struct dbSysHead *head) {
+void recyAllPage(struct dbSysHead *head) {
 	for (long i = 0; i < head->desc.TotalPage; i++) {
 		recyOnePage(head, i);
 	}
