@@ -42,19 +42,28 @@ void Table::SaveTableInfo()
 					flag = false;
 					QMessageBox::about(NULL, QString::fromLocal8Bit("Warning"), "Column is null");
 					break;
+				} 
+				if (j != 2){
+					s += ui.tableWidget->item(i, j)->text() + ",";
 				}
-				s = ui.tableWidget->item(i, j)->text() + " ";
+				else{
+					s += ui.tableWidget->item(i, j)->text();
+				}
 			}
 			else{
 				QString limit = cbos[i]->currentText();
 				//QMessageBox::about(NULL, QString::fromLocal8Bit("Info"), limit);
+				s += limit + ",";
 			}
+
 		}
-		s += "\n";
+		s += "|";
 	}
 	if (flag){
+		QString tablename = ui.tableName->text();
+		s += tablename;
 		//QMessageBox::about(NULL, QString::fromLocal8Bit("Info"), QString::fromLocal8Bit("SaveTable succeed."));
-		emit SGSaveClick(ui.tableName->text());
+		emit SGSaveClick(s);
 	}
 }
 

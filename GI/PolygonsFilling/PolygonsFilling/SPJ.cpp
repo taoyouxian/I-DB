@@ -530,6 +530,61 @@ int SPJ::createTable_nation(struct dbSysHead *head) {
 	head->data_dict[dictID].insertAttribute("n_comment", CHAR_TYPE, 160); 
 
 	return dictID;
+} 
+int SPJ::createTable(struct dbSysHead *head, vector<std::string> vv, string tablename){
+	int fid = fileOpt.createFile(head, USER_FILE, 1);
+	if (fid < 0){
+		printf("创建用户文件失败！");
+		return  -1;
+	}
+	else
+		printf("Create user file %d successfully.\n\n", fid);
+
+	if (fid < 0) {
+		printf("数据库中不存在文件号为%d的文件！\n", fid);
+		return -1;
+	}
+	//在数据字典中找一个空位
+	int dictID = -1;
+	for (int i = 0; i < MAX_FILE_NUM; i++) {
+		if (head->data_dict[i].fileID < 0){
+			dictID = i;
+			break;
+		}
+	}
+	if (dictID < 0) {
+		printf("当前数据库中已存在过多的关系，无法创建新关系！\n");
+		return  -1;
+	}
+
+	head->data_dict[dictID].initRelation(head, fid, tablename.c_str());
+	vector<std::string> v1;
+	char * attribute;
+	string type;
+	int len = 10;
+	for (int i = 0; i < vv.size() - 1; i++){
+		v1 = fileOpt.InfoSplit(vv[i], ",");
+
+		//for (int j = 0; j < vv.size(); j++){
+		attribute = const_cast<char*>(v1[0].c_str());
+		type = v1[1];
+		len = atoi(v1[2].c_str());
+		//}
+		if (type == "int"){
+			head->data_dict[dictID].insertAttribute(attribute, INT_TYPE, len);
+		}
+		else if (type == "char"){
+			head->data_dict[dictID].insertAttribute(attribute, CHAR_TYPE, len);
+		}
+		else if (type == "float"){
+			head->data_dict[dictID].insertAttribute(attribute, FLOAT_TYPE, len);
+		}
+		else if (type == "double"){
+			head->data_dict[dictID].insertAttribute(attribute, DOUBLE_TYPE, len);
+		}
+	}
+
+	return dictID;
 }
 /*
 tableOption.cpp

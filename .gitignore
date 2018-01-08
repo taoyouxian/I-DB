@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+# VS settings
+*.vcxproj
+*.filters
+*.sql
+*.aps
+*.rc
+GeneratedFiles/
+Resources/
+x64/

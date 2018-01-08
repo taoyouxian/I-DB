@@ -35,6 +35,7 @@ public:
 	int createTable_supplier(struct dbSysHead *head);
 	int createTable_partsupp(struct dbSysHead *head);
 	int createTable_nation(struct dbSysHead *head);
+	int createTable(struct dbSysHead *head, vector<std::string> vv, string tablename);
 	//void dropTable(struct dbSysHead *head, char* tableName);
 
 	//select.cpp

@@ -74,11 +74,11 @@ void MainWindow::CreateToolBar()
 	m_pNewToolBar->addAction(m_pNewAction);
 	m_pNewToolBar->setAttribute(Qt::WA_DeleteOnClose);
 
-	m_pQueryAction = new QAction(QString::fromLocal8Bit("Query"), this);
+	/*m_pQueryAction = new QAction(QString::fromLocal8Bit("Query"), this);
 	connect(m_pQueryAction, &QAction::triggered, this, &MainWindow::Query);
 	m_pQueryToolBar = addToolBar(tr("Query"));
 	m_pQueryToolBar->addAction(m_pQueryAction);
-	m_pQueryToolBar->setAttribute(Qt::WA_DeleteOnClose);
+	m_pQueryToolBar->setAttribute(Qt::WA_DeleteOnClose);*/
 
 	m_pInitAction = new QAction(QString::fromLocal8Bit("InitDB"), this);
 	connect(m_pInitAction, &QAction::triggered, this, &MainWindow::InitDB);
@@ -86,23 +86,23 @@ void MainWindow::CreateToolBar()
 	m_pInitToolBar->addAction(m_pInitAction);
 	m_pInitToolBar->setAttribute(Qt::WA_DeleteOnClose);
 
-	m_pDeleteFileAction = new QAction(QString::fromLocal8Bit("DeleteFile"), this);
+	/*m_pDeleteFileAction = new QAction(QString::fromLocal8Bit("DeleteFile"), this);
 	connect(m_pDeleteFileAction, &QAction::triggered, this, &MainWindow::DeleteFile);
 	m_pDeleteFileToolBar = addToolBar(tr("DeleteFile"));
 	m_pDeleteFileToolBar->addAction(m_pDeleteFileAction);
-	m_pDeleteFileToolBar->setAttribute(Qt::WA_DeleteOnClose);
+	m_pDeleteFileToolBar->setAttribute(Qt::WA_DeleteOnClose);*/
 
-	m_pCreateFileAction = new QAction(QString::fromLocal8Bit("CreateFile"), this);
+	/*m_pCreateFileAction = new QAction(QString::fromLocal8Bit("CreateFile"), this);
 	connect(m_pCreateFileAction, &QAction::triggered, this, &MainWindow::CreateFile);
 	m_pCreateFileToolBar = addToolBar(tr("CreateFile"));
 	m_pCreateFileToolBar->addAction(m_pCreateFileAction);
-	m_pCreateFileToolBar->setAttribute(Qt::WA_DeleteOnClose);
+	m_pCreateFileToolBar->setAttribute(Qt::WA_DeleteOnClose);*/
 
-	m_pMemToDiskAction = new QAction(QString::fromLocal8Bit("MemToDisk"), this);
+	/*m_pMemToDiskAction = new QAction(QString::fromLocal8Bit("MemToDisk"), this);
 	connect(m_pMemToDiskAction, &QAction::triggered, this, &MainWindow::MemToDisk);
 	m_pMemToDiskToolBar = addToolBar(tr("MemToDisk"));
 	m_pMemToDiskToolBar->addAction(m_pMemToDiskAction);
-	m_pMemToDiskToolBar->setAttribute(Qt::WA_DeleteOnClose);
+	m_pMemToDiskToolBar->setAttribute(Qt::WA_DeleteOnClose);*/
 
 	/*m_pLoadDataAction = new QAction(QString::fromLocal8Bit("LoadData"), this);
 	connect(m_pLoadDataAction, &QAction::triggered, this, &MainWindow::LoadData);
@@ -152,7 +152,7 @@ void MainWindow::CreateView() {
 	showBrowser = new QTextBrowser(this);
 	showBrowser->setText(info);
 	showBrowser->setGeometry(QRect(200, 31, 760, 70));   // X, Y, W, H
-	showBrowser->setText(info + "\n- - - - - - - - - - - - - - -\n" + "initDB -> deleteFile -> createFile -> memToDisk -> writeFile(loadData) -> readFile -> memToDisk, ShowFileDesc(showDbInfo)");
+	showBrowser->setText(info + "\n- - - - - - - - - - - - - - -\n" + "initDB -> ->initTable -> New(Table) -> LoadData -> Query -> ShowInfo -> Backup");
 
 	info = QString::fromLocal8Bit("【") + "Query SQL Panel" + QString::fromLocal8Bit("】");
 	tBrowser = new QTextBrowser(this);
@@ -532,39 +532,45 @@ void MainWindow::LoadByTableName()
 {
 	DWORD startTime, endTime;
 	QString value = loadText->toPlainText();
-	int fileID = dbhead.tableMap[value.toStdString()];
+	if (value == QString::fromLocal8Bit("【TableName】")){
+		QMessageBox::about(NULL, QString::fromLocal8Bit("Warning"), QString::fromStdString("Input your tablename"));
+	}
+	else{
+		int fileID = dbhead.tableMap[value.toStdString()];
 
-	int recordLen = dbhead.data_dict[fileID].recordLength;
-	QString fileName = fileOpt.OpenFileDialog();
-	startTime = GetTickCount();
-	if (fileName.isNull()) {
-		;
-	}
-	else {
-		char str[3000];
-		string line;
-		ifstream fin(fileName.toStdString());
-		int num = 0;
-		sqlText->setText(QString::fromLocal8Bit("进度条") + ": | - - 0%|");
-		string s1 = "进度条: | - - ";
-		int process;
-		while (!fin.eof()) {
-			if (num % 30 == 0){
-				process = 1.0 * num / 30;
-				s1.append("- - - ");
-			}
-			num++;
-			getline(fin, line);
-			int min = recordLen - line.length();
-			string temp(min, ' ');
-			line.append(temp);
-			strcpy(str, line.c_str());
-			StorageManager.fileOpt.writeFile(&dbhead, fileID, str, this);
-			sqlText->setText(QString::fromStdString(s1 + to_string(process) + "%|"));
+		int recordLen = dbhead.data_dict[fileID].recordLength;
+		QString fileName = fileOpt.OpenFileDialog();
+		startTime = GetTickCount();
+		if (fileName.isNull()) {
+			;
 		}
-		sqlText->setText(QString::fromLocal8Bit("进度条") + ": |- - - - - - - - - - - - - - - - - -- - - - -100%|");
-		fin.close();
+		else {
+			char str[3000];
+			string line;
+			ifstream fin(fileName.toStdString());
+			int num = 0;
+			sqlText->setText(QString::fromLocal8Bit("进度条") + ": | - - 0%|");
+			string s1 = "进度条: | - - ";
+			int process;
+			while (!fin.eof()) {
+				if (num % 30 == 0){
+					process = 1.0 * num / 30;
+					s1.append("- - - ");
+				}
+				num++;
+				getline(fin, line);
+				int min = recordLen - line.length();
+				string temp(min, ' ');
+				line.append(temp);
+				strcpy(str, line.c_str());
+				StorageManager.fileOpt.writeFile(&dbhead, fileID, str, this);
+				sqlText->setText(QString::fromStdString(s1 + to_string(process) + "%|"));
+			}
+			sqlText->setText(QString::fromLocal8Bit("进度条") + ": |- - - - - - - - - - - - - - - - - -- - - - -100%|");
+			fin.close();
+		}
 	}
+	
 	endTime = GetTickCount();
 	std::stringstream ss;
 	double time = (double)(endTime - startTime);
@@ -615,7 +621,12 @@ void MainWindow::ShowDBInfo()
 }
 void MainWindow::Backup()
 {
-
+	char filename[100];
+	strcpy(filename, PATH);
+	strcat(filename, "database.mat\0");
+	char time[100];
+	changeTime(time, ".mat");
+	rename(filename, time);
 }
 
 void MainWindow::ShowFileDesc()
@@ -648,4 +659,23 @@ void MainWindow::changeCboxValue(int index)
 void MainWindow::receiveData(QString data)
 {
 	string value = data.toStdString();  //获取传递过来的数据 
+	vector<std::string> vv = fileOpt.InfoSplit(value, "|");
+	/*vector<std::string> v1;
+	vector<std::string> v2;*/
+	/*for (int i = 0; i < vv.size() - 1; i++){
+		v1 = fileOpt.InfoSplit(vv[i], ",");
+	}*/
+	/*v1 = fileOpt.InfoSplit(vv[0], ",");
+	v2 = fileOpt.InfoSplit(vv[1], ",");*/
+	string tablename = vv[2];
+	// 创建表supplier
+	int temp_dictID = StorageManager.spjOpt.createTable(&dbhead, vv, tablename);
+
+	if (temp_dictID < 0){
+		printf("Create table supplier failed.\n");
+		exit(0);
+	}
+	dbhead.tableName.push_back(tablename);
+	dbhead.tableMap[tablename] = temp_dictID;
+	StorageManager.showTables(&dbhead, this); 
 }
