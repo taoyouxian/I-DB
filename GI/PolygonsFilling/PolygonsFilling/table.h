@@ -24,24 +24,21 @@ public:
 	Table(QWidget *parent = 0);
 	~Table();
 	QComboBox *cbos[15];
-	 
-signals:
-	void SGCancelClick();
-	void SGSaveClick();
 
 private:
 	Ui::table ui;
 	void BacktoMain() { emit SGCancelClick(); }
-	void SaveTableInfo();
 	void AddFiled();
 	void InitTableWidget();
 	void SelectType(const QString &text);
 
+private slots:
+	void SaveTableInfo();
 
-private:
 
-public:
-	
+signals:
+	void SGCancelClick();
+	void SGSaveClick(QString data);    //在子窗口创建public函数用来获取传递的数据  
 
 };
 

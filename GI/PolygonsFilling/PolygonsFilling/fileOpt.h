@@ -44,15 +44,17 @@ public:
 	struct pageHead extendFile(struct dbSysHead *head, int fid, struct pageHead *preph);
 	void writeFile(struct dbSysHead *head, int dictID, char *str, MainWindow* ui);
 	void readFile(struct dbSysHead *head, int dictID, char* attribute_name, MainWindow* ui);
+	void deleteRecordByCompKey(struct dbSysHead *head, int dictID, char* attribute_name, char* compType, char* value, MainWindow* ui);
+	void deleteRecord(struct dbSysHead *head, int dictID, MainWindow* ui);
 	void writeFile(struct dbSysHead *head, int dictID, MainWindow* ui);
 	void insertIntoMapFile(struct dbSysHead *head, struct dbMapTable mt, long logicID);
 
 	QString		OpenFileDialog();
+	vector<std::string>		InfoSplit(const string& s, const string& c);
 
 private:
 	//QString		OpenFileDialog();
 	QString		SaveFileDialog();
-	vector<std::string>		InfoSplit(const string& s, const string& c);
 };
 
 

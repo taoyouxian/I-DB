@@ -82,8 +82,46 @@ void Storage::init_MapData(struct dbSysHead *head, MainWindow* ui){
 		printf("Create data dictionary file %d successfully.\n\n", dataDict_fid);
 	}
 }
+void Storage::showTables(struct dbSysHead *head, MainWindow* ui){
+	string s1;
+	QString info = QString::fromLocal8Bit("【") + "System Tables Info" + QString::fromLocal8Bit("】");
+	for (int i = 0; i < head->tableName.size(); i++){
+		string tablename = head->tableName[i];
+		int s = head->tableMap[tablename];
+		string str = to_string(s);
+		s1.append(str + "  " + tablename + "\n");
+		for (int j = 0; j < head->data_dict[s].attributeNum; j++){
+			string tab = head->data_dict[s].atb[j].getName();
+			s1.append("\t" + tab + "\n");
+		}
+		s1.append("-------------------------------\n");
+	}
+	ui->sysTables->setText(info + "\n- - - - - - - - - - - - - - - -\n" + QString::fromStdString(s1));
+}
 
 int Storage::init_Table(struct dbSysHead *head, MainWindow* ui){
+	// 创建表supplier
+	int supplier_dictID = spjOpt.createTable_supplier(head);
+	if (supplier_dictID < 0){
+		printf("Create table supplier failed.\n");
+		exit(0);
+	}
+	char str1[3000];
+	int recordLen1 = head->data_dict[supplier_dictID].recordLength;
+	ifstream fin("H:\\SelfLearning\\SAI\\Course\\tinydbms\\QueryAccess\\supplier.tbl");
+	while (!fin.eof())
+	{ 
+		string line;
+		getline(fin, line);
+		int min = recordLen1 - line.length();
+		string temp(min, ' ');
+		line.append(temp);  
+		strcpy(str1, line.c_str());
+		fileOpt.writeFile(head, supplier_dictID, str1, ui);
+	} 
+	head->tableName.push_back("supplier");
+	head->tableMap["supplier"] = supplier_dictID;
+
 	// 创建表partsupp
 	int partsupp_dictID = spjOpt.createTable_partsupp(head);
 	if (partsupp_dictID < 0){
@@ -91,12 +129,13 @@ int Storage::init_Table(struct dbSysHead *head, MainWindow* ui){
 		exit(0);
 	}
 	char str[300];
+	int recordLen = head->data_dict[partsupp_dictID].recordLength;
 	ifstream fin2("H:\\SelfLearning\\SAI\\Course\\tinydbms\\QueryAccess\\partsupp.tbl");
 	while (!fin2.eof())
 	{
 		string line;
 		getline(fin2, line);
-		int min = 300 - line.length();
+		int min = recordLen - line.length();
 		string temp(min, ' ');
 		line.append(temp);
 		strcpy(str, line.c_str());
@@ -104,28 +143,29 @@ int Storage::init_Table(struct dbSysHead *head, MainWindow* ui){
 	}
 	head->tableName.push_back("partsupp");
 	head->tableMap["partsupp"] = partsupp_dictID;
-	// 创建表supplier
-	int supplier_dictID = spjOpt.createTable_supplier(head);
-	if (supplier_dictID < 0){
-		printf("Create table supplier failed.\n");
+
+
+	// 创建表nation
+	int nation_dictID = spjOpt.createTable_nation(head);
+	if (nation_dictID < 0){
+		printf("Create table nation failed.\n");
 		exit(0);
 	}
-	/*char str[3000];
-	ifstream fin("H:\\SelfLearning\\SAI\\Course\\tinydbms\\QueryAccess\\supplier.tbl");
-	while (!fin.eof())
+	char str3[300];
+	int recLen = head->data_dict[nation_dictID].recordLength;
+	ifstream fin3("H:\\SelfLearning\\SAI\\Course\\tinydbms\\QueryAccess\\nation.tbl");
+	while (!fin3.eof())
 	{
 		string line;
-		getline(fin, line);
-		strcpy(str, line.c_str());
-		fileOpt.writeFile(head, supplier_dictID, str, ui);
-	}*/
-	//show_FileDesc(head, supplier_dictID);  
-	/*char str1[25];
-	itoa(supplier_dictID, str1, 10);
-	QMessageBox::about(NULL, QString::fromLocal8Bit("Info"), QString::fromLocal8Bit(str1));*/
-	//readFile(&head, supplier_dictID);
-	head->tableName.push_back("supplier");
-	head->tableMap["supplier"] = supplier_dictID; 
+		getline(fin3, line);
+		int min = recLen - line.length();
+		string temp(min, ' ');
+		line.append(temp);
+		strcpy(str3, line.c_str());
+		fileOpt.writeFile(head, nation_dictID, str3, ui);
+	}
+	head->tableName.push_back("nation");
+	head->tableMap["nation"] = nation_dictID;
 	return supplier_dictID;
 }
 
@@ -234,37 +274,66 @@ void Storage::show_MapTableFile(struct dbSysHead *head, int fid, MainWindow* ui)
 
 
 void Storage::show_SysDesc(struct dbSysHead *head, MainWindow* ui){
-	printf("\n******************* Database related parameters ****************\n");
-	printf("Total database size: %ld\n", head->desc.sizeOfFile);
-	printf("The size of each page: %ld\n", head->desc.sizePerPage);
-	printf("The total number of database pages: %ld\n", head->desc.TotalPage);
-	printf("Currently available pages: %ld\n", head->desc.AvaiPage);
-	printf("The starting address of free space: %ld\n", head->desc.addr_FreeSpace_BitMap);      // 空闲空间位示图的起始地址
-	printf("The size of bitmap size in free space: %ld\n", head->desc.size_FreeSpace_BitMap);          // 空闲空间位示图的大小
-	printf("The start address of the diagram in idle logic bit: %ld\n", head->desc.addr_FreeLogicID_BitMap);  // 空闲逻辑号位示图的起始地址
-	printf("The size of the bitmap in idle logic number: %ld\n", head->desc.size_FreeLogicID_BitMap);      // 空闲逻辑号位示图的大小
-	printf("The starting address of the data area: %ld\n", head->desc.addr_data);
-	printf("The file number of the mapping table file: %d\n", head->desc.fid_MapTable);
-	printf("File number of the data dictionary file: %d\n", head->desc.fid_DataDictionary);
-	printf("The total number of files in the current database: %d\n", head->desc.curFileNum);
-	printf("The total number of records in the current database: %ld\n", head->desc.curRecordNum);
-	printf("\n**************************************************\n");
+	ui->fileLog.append("******************* Database related parameters ****************\n");
+	ui->fileLog.append("Total database size: ");
+	ui->fileLog.append(to_string(head->desc.sizeOfFile));
+	ui->fileLog.append("\n");
+	ui->fileLog.append("The size of each page: ");
+	ui->fileLog.append(to_string(head->desc.sizePerPage));
+	ui->fileLog.append("\n");
+	ui->fileLog.append("The total number of database pages: ");
+	ui->fileLog.append(to_string(head->desc.TotalPage));
+	ui->fileLog.append("\n");
+	ui->fileLog.append("Currently available pages: ");
+	ui->fileLog.append(to_string(head->desc.AvaiPage));
+	ui->fileLog.append("\n");
+	ui->fileLog.append("The starting address of free space: ");      // 空闲空间位示图的起始地址
+	ui->fileLog.append(to_string(head->desc.addr_FreeSpace_BitMap));
+	ui->fileLog.append("\n");
+	ui->fileLog.append("The size of bitmap size in free space: ");          // 空闲空间位示图的大小
+	ui->fileLog.append(to_string(head->desc.size_FreeSpace_BitMap));
+	ui->fileLog.append("\n");
+	ui->fileLog.append("The start address of the diagram in idle logic bit: ");  // 空闲逻辑号位示图的起始地址
+	ui->fileLog.append(to_string(head->desc.addr_FreeLogicID_BitMap));
+	ui->fileLog.append("\n");
+	ui->fileLog.append("The size of the bitmap in idle logic number: ");      // 空闲逻辑号位示图的大小
+	ui->fileLog.append(to_string(head->desc.size_FreeLogicID_BitMap));
+	ui->fileLog.append("\n");
+	ui->fileLog.append("The starting address of the data area: ");
+	ui->fileLog.append(to_string(head->desc.addr_data));
+	ui->fileLog.append("\n");
+	ui->fileLog.append("The file number of the mapping table file: ");
+	ui->fileLog.append(to_string(head->desc.fid_MapTable));
+	ui->fileLog.append("\n");
+	ui->fileLog.append("File number of the data dictionary file: ");
+	ui->fileLog.append(to_string(head->desc.fid_DataDictionary));
+	ui->fileLog.append("\n");
+	ui->fileLog.append("The total number of files in the current database: ");
+	ui->fileLog.append(to_string(head->desc.curFileNum));
+	ui->fileLog.append("\n");
+	ui->fileLog.append("The total number of records in the current database: ");
+	ui->fileLog.append(to_string(head->desc.curRecordNum));
+	ui->fileLog.append("\n**************************************************************\n");
+	ui->sqlText->setText(QString::fromStdString(ui->fileLog));
 }
 
 void Storage::show_Relation(struct dbSysHead *head, int dictID, MainWindow* ui) {
 	Relation rl = head->data_dict[dictID];
-	ui->fileLog.append("Tablename: %s\n");
+	ui->fileLog.append("Tablename: ");
 	ui->fileLog.append(rl.relationName);
-	ui->fileLog.append("Attributes number: %d\n");
+	ui->fileLog.append("\n");
+	ui->fileLog.append("Attributes number: ");
 	ui->fileLog.append(to_string(rl.attributeNum));
-	ui->fileLog.append("Record length: %d\n");
+	ui->fileLog.append("\n");
+	ui->fileLog.append("Record length: ");
 	ui->fileLog.append(to_string(rl.recordLength));
-	ui->fileLog.append("Record number: %d\n");
+	ui->fileLog.append("\n");
+	ui->fileLog.append("Record number: ");
 	ui->fileLog.append(to_string(rl.recordNum));
+	ui->fileLog.append("\n");
 }
 
 void Storage::show_FileDesc(struct dbSysHead *head, int dictID, MainWindow* ui) {
-	ui->fileLog = "";
 	QString value = ui->loadText->toPlainText();
 
 	int fid = head->data_dict[dictID].fileID;
@@ -275,7 +344,7 @@ void Storage::show_FileDesc(struct dbSysHead *head, int dictID, MainWindow* ui) 
 	long pageNum = head->desc.fileDesc[fid].filePageNum;
 	long pageNo = head->desc.fileDesc[fid].fileFirstPageNo;
 	int type = head->desc.fileDesc[fid].fileType;
-	ui->fileLog.append("\n**************************************************\n");
+	ui->fileLog.append("**************************************************\n");
 	ui->fileLog.append("File Type: ");
 	if (type == MAP_FILE)
 		ui->fileLog.append("Mapping file\n");
@@ -285,9 +354,10 @@ void Storage::show_FileDesc(struct dbSysHead *head, int dictID, MainWindow* ui) 
 	}
 	else
 		ui->fileLog.append("Index file\n");
-	ui->fileLog.append("The file occupies: %ld page\n");
+	ui->fileLog.append("The file occupies: ");
 	ui->fileLog.append(to_string(pageNum));
-	ui->fileLog.append("The starting page number of the file is: %ld\n");
+	ui->fileLog.append(" page\n");
+	ui->fileLog.append("The starting page number of the file is: ");
 	ui->fileLog.append(to_string(pageNo));
 	ui->fileLog.append("\n**************************************************\n");
 

@@ -22,6 +22,18 @@ struct dbMapTable {
 	long recordID;
 }; 
 
+class SQLsenten
+{
+public:
+	vector<string> key;//关键字：create，column，listnode，
+	map<string, vector<string> > value;//参数列表
+
+	SQLsenten();
+	vector<string> string2vec(string line);//按逗号分割字符串
+
+	void print();//打印结果
+};
+
 /*为了实现变长记录而增设的，待实现*/
 //struct recordHead{
 //    int recordLength;
@@ -86,6 +98,7 @@ public:
 	int init_Table(struct dbSysHead *head, MainWindow* ui);
 	void show_Relation(struct dbSysHead *head, int dictID, MainWindow* ui);
 	void show_FileDesc(struct dbSysHead *head, int fid, MainWindow* ui);
+	void showTables(struct dbSysHead *head, MainWindow* ui);
 
 	//closeDB.cpp
 	int sysUpdate(struct dbSysHead *head);

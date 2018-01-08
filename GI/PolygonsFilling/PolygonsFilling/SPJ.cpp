@@ -448,13 +448,13 @@ int SPJ::createTable_supplier(struct dbSysHead *head) {
 	}
 
 	head->data_dict[dictID].initRelation(head, fid, "supplier");
-	head->data_dict[dictID].insertAttribute("S_superkey", INT_TYPE, 10);
-	head->data_dict[dictID].insertAttribute("S_name", CHAR_TYPE, 30);
-	head->data_dict[dictID].insertAttribute("S_address", CHAR_TYPE, 40);
-	head->data_dict[dictID].insertAttribute("S_nationkey", INT_TYPE, 10);
-	head->data_dict[dictID].insertAttribute("S_phone", CHAR_TYPE, 20);
-	head->data_dict[dictID].insertAttribute("S_acctbal", FLOAT_TYPE, 10);
-	head->data_dict[dictID].insertAttribute("S_comment", CHAR_TYPE, 110);
+	head->data_dict[dictID].insertAttribute("s_superkey", INT_TYPE, 10);
+	head->data_dict[dictID].insertAttribute("s_name", CHAR_TYPE, 30);
+	head->data_dict[dictID].insertAttribute("s_address", CHAR_TYPE, 40);
+	head->data_dict[dictID].insertAttribute("s_nationkey", INT_TYPE, 10);
+	head->data_dict[dictID].insertAttribute("s_phone", CHAR_TYPE, 20);
+	head->data_dict[dictID].insertAttribute("s_acctbal", FLOAT_TYPE, 10);
+	head->data_dict[dictID].insertAttribute("s_comment", CHAR_TYPE, 110);
 
 	return dictID;
 }
@@ -487,11 +487,47 @@ int SPJ::createTable_partsupp(struct dbSysHead *head) {
 	}
 
 	head->data_dict[dictID].initRelation(head, fid, "partsupp");
-	head->data_dict[dictID].insertAttribute("PS_PARTKEY", INT_TYPE, 10);
-	head->data_dict[dictID].insertAttribute("S_superkey", INT_TYPE, 10);
-	head->data_dict[dictID].insertAttribute("PS_AVAILQTY", INT_TYPE, 10);
-	head->data_dict[dictID].insertAttribute("PS_SUPPLYCOST", FLOAT_TYPE, 10);
-	head->data_dict[dictID].insertAttribute("PS_COMMENT", CHAR_TYPE, 200);
+	head->data_dict[dictID].insertAttribute("ps_partkey", INT_TYPE, 10);
+	head->data_dict[dictID].insertAttribute("s_superkey", INT_TYPE, 10);
+	head->data_dict[dictID].insertAttribute("ps_availqty", INT_TYPE, 10);
+	head->data_dict[dictID].insertAttribute("ps_supplycost", FLOAT_TYPE, 10);
+	head->data_dict[dictID].insertAttribute("ps_comment", CHAR_TYPE, 200);
+
+	return dictID;
+}
+
+//创建表，返回其在数据字典中的下标
+int SPJ::createTable_nation(struct dbSysHead *head) {
+	int fid = fileOpt.createFile(head, USER_FILE, 1);
+	if (fid < 0){
+		printf("创建用户文件失败！");
+		return  -1;
+	}
+	else
+		printf("Create user file %d successfully.\n\n", fid);
+
+	if (fid < 0) {
+		printf("数据库中不存在文件号为%d的文件！\n", fid);
+		return -1;
+	}
+	//在数据字典中找一个空位
+	int dictID = -1;
+	for (int i = 0; i < MAX_FILE_NUM; i++) {
+		if (head->data_dict[i].fileID < 0){
+			dictID = i;
+			break;
+		}
+	}
+	if (dictID < 0) {
+		printf("当前数据库中已存在过多的关系，无法创建新关系！\n");
+		return  -1;
+	}
+
+	head->data_dict[dictID].initRelation(head, fid, "nation");
+	head->data_dict[dictID].insertAttribute("n_nationkey", INT_TYPE, 10);
+	head->data_dict[dictID].insertAttribute("n_name", CHAR_TYPE, 30);
+	head->data_dict[dictID].insertAttribute("ps_partkey", INT_TYPE, 10);
+	head->data_dict[dictID].insertAttribute("n_comment", CHAR_TYPE, 160); 
 
 	return dictID;
 }
@@ -502,7 +538,7 @@ tableOption.cpp
 select.cpp
 */
 
-int SPJ::tableScanEqualSelector(struct dbSysHead *head, int dictID, char* attribute_name, char* value){
+int SPJ::tableScanEqualSelector(struct dbSysHead *head, int dictID, char* attribute_name, char* compType, char* value){
 	Relation rl = head->data_dict[dictID];
 	int fid = rl.fileID;
 	long pageNo = head->desc.fileDesc[fid].fileFirstPageNo;
@@ -519,27 +555,213 @@ int SPJ::tableScanEqualSelector(struct dbSysHead *head, int dictID, char* attrib
 		printf("关系表%s中没有名为%s的属性！\n", rl.relationName, attribute_name);
 		return -1;
 	}
+
+	struct offsetInPage curOffset, preOffset;
 	//按块遍历关系的每个元组
 	for (int i = 0; i < pageNum; i++){
 		int mapNo =bufOpt.reqPage(head, pageNo);
 		struct pageHead ph;
 		memcpy(&ph, head->buff.data[mapNo], SIZE_PAGEHEAD);
-		for (int j = 0; j < ph.curRecordNum; j++) {
-
-			char *record = (char*)malloc(rl.recordLength);
-			getNextRecord(head, mapNo, j, record);
-			char *val = (char*)malloc(strlen(record));
-			memset(val, 0, strlen(record));
-			int s = getValueByAttrID(record, attr_index, val);
-			if (s < 0){
-				printf("bug in join.cpp\n");
-				exit(0);
-			}
-			if (strcmp(val, value) == 0){
-				//discard：保存到临时表中，临时表不存储到数据库中，而是单独的一个临时txt，当数据库关闭时删除该txt
-				insertOneRecord(head, tmp_table_dictID, record);
+		for (int j = 0; j < ph.curRecordNum; j++) { 
+			memcpy(&curOffset, head->buff.data[mapNo] + SIZE_PAGEHEAD + SIZE_OFFSET * j, SIZE_OFFSET);
+			if (curOffset.isDeleted == 0){
+				char *record = (char*)malloc(rl.recordLength);
+				getNextRecord(head, mapNo, j, record);
+				char *val = (char*)malloc(strlen(record));
+				memset(val, 0, strlen(record));
+				int s = getValueByAttrID(record, attr_index, val);
+				if (s < 0){
+					printf("bug in join.cpp\n");
+					exit(0);
+				}
+				//判断进行范围选择的属性的类型
+				if (rl.atb[attr_index].getType() == INT_TYPE){
+					int value_ = atoi(value);
+					int val_ = atoi(val);
+					if (strcmp(compType, "=") == 0){
+						if (val_ == value_){
+							//discard：保存到临时表中，临时表不存储到数据库中，而是单独的一个临时txt，当数据库关闭时删除该txt
+							insertOneRecord(head, tmp_table_dictID, record);
+						}
+					}
+					else if (strcmp(compType, ">=") == 0){
+						if (val_ >= value_){
+							insertOneRecord(head, tmp_table_dictID, record);
+						}
+					}
+					else if (strcmp(compType, "<=") == 0){
+						if (val_ <= value_){
+							insertOneRecord(head, tmp_table_dictID, record);
+						}
+					}
+					else if (strcmp(compType, "<>") == 0){
+						if (val_ != value_){
+							insertOneRecord(head, tmp_table_dictID, record);
+						}
+					}
+					else if (strcmp(compType, ">") == 0){
+						if (val_ > value_){
+							insertOneRecord(head, tmp_table_dictID, record);
+						}
+					}
+					else if (strcmp(compType, "<") == 0){
+						if (val_ < value_){
+							insertOneRecord(head, tmp_table_dictID, record);
+						}
+					}
+				}//char类型
+				else if (rl.atb[attr_index].getType() == CHAR_TYPE) {
+					if (strcmp(compType, "=") == 0){
+						if (strcmp(val, value) == 0){
+							insertOneRecord(head, tmp_table_dictID, record);
+						}
+					}
+					else if (strcmp(compType, ">=") == 0){
+						if (strcmp(val, value) >= 0){
+							insertOneRecord(head, tmp_table_dictID, record);
+						}
+					}
+					else if (strcmp(compType, "<=") == 0){
+						if (strcmp(val, value) <= 0){
+							insertOneRecord(head, tmp_table_dictID, record);
+						}
+					}
+					else if (strcmp(compType, "<>") == 0){
+						if (strcmp(val, value) != 0){
+							insertOneRecord(head, tmp_table_dictID, record);
+						}
+					}
+					else if (strcmp(compType, ">") == 0){
+						if (strcmp(val, value) > 0){
+							insertOneRecord(head, tmp_table_dictID, record);
+						}
+					}
+					else if (strcmp(compType, "<") == 0){
+						if (strcmp(val, value) < 0){
+							insertOneRecord(head, tmp_table_dictID, record);
+						}
+					}
+				} 
 			}
 		}
+		if (ph.nextPageNo <= 0)
+			break;
+		else
+			pageNo = ph.nextPageNo;
+	}
+
+	return tmp_table_dictID;
+}
+
+int SPJ::tableScanCountSelectorByCond(struct dbSysHead *head, int dictID, char* attribute_name, char* compType, char* value){
+	Relation rl = head->data_dict[dictID];
+	int fid = rl.fileID;
+	long pageNo = head->desc.fileDesc[fid].fileFirstPageNo;
+	long pageNum = head->desc.fileDesc[fid].filePageNum;
+
+	int tmp_table_dictID = createTmpTable(head, rl);
+	if (tmp_table_dictID < 0){
+		printf("创建临时表失败！\n");
+		return -1;
+	}
+	int attr_index = rl.getAttributeIndexByName(attribute_name);
+
+	if (attr_index < 0){
+		printf("关系表%s中没有名为%s的属性！\n", rl.relationName, attribute_name);
+		return -1;
+	}
+
+	int count = 0;
+	struct offsetInPage curOffset, preOffset;
+	//按块遍历关系的每个元组
+	for (int i = 0; i < pageNum; i++){
+		int mapNo =bufOpt.reqPage(head, pageNo);
+		struct pageHead ph;
+		memcpy(&ph, head->buff.data[mapNo], SIZE_PAGEHEAD);
+		for (int j = 0; j < ph.curRecordNum; j++) { 
+			memcpy(&curOffset, head->buff.data[mapNo] + SIZE_PAGEHEAD + SIZE_OFFSET * j, SIZE_OFFSET);
+			if (curOffset.isDeleted == 0){
+				char *record = (char*)malloc(rl.recordLength);
+				getNextRecord(head, mapNo, j, record);
+				char *val = (char*)malloc(strlen(record));
+				memset(val, 0, strlen(record));
+				int s = getValueByAttrID(record, attr_index, val);
+				if (s < 0){
+					printf("bug in join.cpp\n");
+					exit(0);
+				}
+				//判断进行范围选择的属性的类型
+				if (rl.atb[attr_index].getType() == INT_TYPE){
+					int value_ = atoi(value);
+					int val_ = atoi(val);
+					if (strcmp(compType, "=") == 0){
+						if (val_ == value_){
+							count++;
+						}
+					}
+					else if (strcmp(compType, ">=") == 0){
+						if (val_ >= value_){
+							count++;
+						}
+					}
+					else if (strcmp(compType, "<=") == 0){
+						if (val_ <= value_){
+							count++;
+						}
+					}
+					else if (strcmp(compType, "<>") == 0){
+						if (val_ != value_){
+							count++;
+						}
+					}
+					else if (strcmp(compType, ">") == 0){
+						if (val_ > value_){
+							count++;
+						}
+					}
+					else if (strcmp(compType, "<") == 0){
+						if (val_ < value_){
+							count++;
+						}
+					}
+				}//char类型
+				else if (rl.atb[attr_index].getType() == CHAR_TYPE) {
+					if (strcmp(compType, "=") == 0){
+						if (strcmp(val, value) == 0){
+							count++;
+						}
+					}
+					else if (strcmp(compType, ">=") == 0){
+						if (strcmp(val, value) >= 0){
+							count++;
+						}
+					}
+					else if (strcmp(compType, "<=") == 0){
+						if (strcmp(val, value) <= 0){
+							count++;
+						}
+					}
+					else if (strcmp(compType, "<>") == 0){
+						if (strcmp(val, value) != 0){
+							count++;
+						}
+					}
+					else if (strcmp(compType, ">") == 0){
+						if (strcmp(val, value) > 0){
+							count++;
+						}
+					}
+					else if (strcmp(compType, "<") == 0){
+						if (strcmp(val, value) < 0){
+							count++;
+						}
+					}
+				} 
+			}
+		}  
+		char str1[25];
+		itoa(count, str1, 10);
+		insertOneRecord(head, tmp_table_dictID, str1);
 		if (ph.nextPageNo <= 0)
 			break;
 		else
@@ -569,7 +791,7 @@ int SPJ::tableScanCountSelector(struct dbSysHead *head, int dictID){
 		/*for (int j = 0; j < ph.curRecordNum; j++) {
 
 		}*/
-		count += ph.curRecordNum;
+		count += ph.curRecordNum - ph.curDelNum;
 	} 
 	char str1[25];
 	itoa(count, str1, 10);
@@ -593,38 +815,42 @@ int SPJ::tableScanRangeSelector(struct dbSysHead *head, int dictID, char* attrib
 		printf("关系表%s中没有名为%s的属性！\n", rl.relationName, attribute_name);
 		return -1;
 	}
+	struct offsetInPage curOffset, preOffset;
 	//按块遍历关系的每个元组
 	for (int i = 0; i < pageNum; i++){
 		int mapNo =bufOpt.reqPage(head, pageNo);
 		struct pageHead ph;
 		memcpy(&ph, head->buff.data[mapNo], SIZE_PAGEHEAD);
 		for (int j = 0; j < ph.curRecordNum; j++) {
-			char *record = (char*)malloc(rl.recordLength);
-			getNextRecord(head, mapNo, j, record);
-			char *val = (char*)malloc(rl.recordLength);
-			memset(val, 0, rl.recordLength);
-			int s = getValueByAttrID(record, attr_index, val);
-			if (s < 0){
-				printf("bug in join.cpp\n");
-				exit(0);
-			}
-			//判断进行范围选择的属性的类型
-			if (rl.atb[attr_index].getType() == INT_TYPE){
-				int min_ = atoi(min);
-				int max_ = atoi(max);
-				int val_ = atoi(val);
-				if (val_ >= min_ && val_ <= max_)
-					insertOneRecord(head, tmp_table_dictID, record);
-			}
-			//char类型
-			else if (rl.atb[attr_index].getType() == CHAR_TYPE) {
-				if (strcmp(min, val) <= 0 && strcmp(max, val) >= 0){
-					insertOneRecord(head, tmp_table_dictID, record);
+			memcpy(&curOffset, head->buff.data[mapNo] + SIZE_PAGEHEAD + SIZE_OFFSET * j, SIZE_OFFSET);
+			if (curOffset.isDeleted == 0){
+				char *record = (char*)malloc(rl.recordLength);
+				getNextRecord(head, mapNo, j, record);
+				char *val = (char*)malloc(rl.recordLength);
+				memset(val, 0, rl.recordLength);
+				int s = getValueByAttrID(record, attr_index, val);
+				if (s < 0){
+					printf("bug in join.cpp\n");
+					exit(0);
 				}
-			}
-			//date类型，待实现
-			else{
+				//判断进行范围选择的属性的类型
+				if (rl.atb[attr_index].getType() == INT_TYPE){
+					int min_ = atoi(min);
+					int max_ = atoi(max);
+					int val_ = atoi(val);
+					if (val_ >= min_ && val_ <= max_)
+						insertOneRecord(head, tmp_table_dictID, record);
+				}
+				//char类型
+				else if (rl.atb[attr_index].getType() == CHAR_TYPE) {
+					if (strcmp(min, val) <= 0 && strcmp(max, val) >= 0){
+						insertOneRecord(head, tmp_table_dictID, record);
+					}
+				}
+				//date类型，待实现
+				else{
 
+				}
 			}
 		}
 		if (ph.nextPageNo <= 0)
@@ -668,6 +894,7 @@ int SPJ::projection(struct dbSysHead *head, int dictID, char* attribute_name){
 		printf("创建临时表失败！\n");
 		return -1;
 	}
+	struct offsetInPage curOffset, preOffset;
 	for (int i = 0; i < pageNum; i++){
 		int mapNo =bufOpt.reqPage(head, pageNo);
 		struct pageHead ph;
@@ -675,28 +902,31 @@ int SPJ::projection(struct dbSysHead *head, int dictID, char* attribute_name){
 		//处理该页中的每一条记录
 		for (int recordID = 0; recordID < ph.curRecordNum; recordID++) {
 
-			char *record = (char*)malloc(rl.recordLength);
-			getNextRecord(head, mapNo, recordID, record);
+			memcpy(&curOffset, head->buff.data[mapNo] + SIZE_PAGEHEAD + SIZE_OFFSET * recordID, SIZE_OFFSET);
+			if (curOffset.isDeleted == 0){
+				char *record = (char*)malloc(rl.recordLength);
+				getNextRecord(head, mapNo, recordID, record);
 
-			char *result = (char*)malloc(rl.recordLength);
-			memset(result, 0, rl.recordLength);
+				char *result = (char*)malloc(rl.recordLength);
+				memset(result, 0, rl.recordLength);
 
-			char *one_filed = (char*)malloc(rl.recordLength);
-			memset(one_filed, 0, rl.recordLength);
+				char *one_filed = (char*)malloc(rl.recordLength);
+				memset(one_filed, 0, rl.recordLength);
 
-			for (int k = 0; k < attrNum; k++) {
-				int p = getValueByAttrID(record, filedIndex[k], one_filed);
-				if (p < 0){
-					printf("bug in projection.cpp\n");
-					//exit(0);
+				for (int k = 0; k < attrNum; k++) {
+					int p = getValueByAttrID(record, filedIndex[k], one_filed);
+					if (p < 0){
+						printf("bug in projection.cpp\n");
+						//exit(0);
+					}
+					strcat(result, one_filed);
+					if (k < attrNum - 1)
+						strcat(result, "|");
+					else
+						break;
 				}
-				strcat(result, one_filed);
-				if (k < attrNum - 1)
-					strcat(result, "|");
-				else
-					break;
+				insertOneRecord(head, tmp_table_dictID, result);
 			}
-			insertOneRecord(head, tmp_table_dictID, result);
 		}
 		if (ph.nextPageNo <= 0)
 			break;
@@ -831,12 +1061,12 @@ int SPJ::nestedLoopJoin(struct dbSysHead *head, int employee_dictID, int departm
 							strcat(result, dept_record + pd + strlen(dept_value) + 1);
 							insertOneRecord(head, tmp_table_dictID, result);
 						}
-						free(dept_record);
-						free(dept_value);
+					/*	free(dept_record);
+						free(dept_value);*/
 					}
 				}
-				free(emp_record);
-				free(emp_value);
+				/*free(emp_record);
+				free(emp_value);*/
 			}
 			if (emp_ph.nextPageNo < 0)
 				break;

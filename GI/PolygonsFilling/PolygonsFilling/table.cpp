@@ -47,14 +47,14 @@ void Table::SaveTableInfo()
 			}
 			else{
 				QString limit = cbos[i]->currentText();
-				QMessageBox::about(NULL, QString::fromLocal8Bit("Info"), limit);
+				//QMessageBox::about(NULL, QString::fromLocal8Bit("Info"), limit);
 			}
 		}
 		s += "\n";
 	}
 	if (flag){
-		QMessageBox::about(NULL, QString::fromLocal8Bit("Info"), QString::fromLocal8Bit("SaveTable succeed."));
-		emit SGSaveClick();
+		//QMessageBox::about(NULL, QString::fromLocal8Bit("Info"), QString::fromLocal8Bit("SaveTable succeed."));
+		emit SGSaveClick(ui.tableName->text());
 	}
 }
 

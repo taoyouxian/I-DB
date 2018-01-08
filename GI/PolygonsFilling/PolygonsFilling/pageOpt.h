@@ -10,6 +10,7 @@
 struct pageHead{
 	long pageNo;                    // 页号
 	int curRecordNum;               // 当前该页存储的记录个数
+	int curDelNum = 0;               // 当前该页被删除的记录个数
 	long prePageNo;
 	long nextPageNo;
 	long freeSpace;                 // 该页的空余空间大小

@@ -26,6 +26,7 @@ public:
 	void insertRecordByKey(struct dbSysHead *head, int fid, char *str);
 	void deleteRecordByKey(struct dbSysHead *head, int fid, int key);
 
+
 	//tableOption.cpp
 	int createTable_employee(struct dbSysHead *head);
 	int createTable_employee(struct dbSysHead *head, string sql);
@@ -33,13 +34,15 @@ public:
 	int createTable_birthday(struct dbSysHead *head);
 	int createTable_supplier(struct dbSysHead *head);
 	int createTable_partsupp(struct dbSysHead *head);
+	int createTable_nation(struct dbSysHead *head);
 	//void dropTable(struct dbSysHead *head, char* tableName);
 
 	//select.cpp
 	int tableScanCountSelector(struct dbSysHead *head, int dictID);
-	int tableScanEqualSelector(struct dbSysHead *head, int dictID, char* attribute_name, char* value);
+	int tableScanEqualSelector(struct dbSysHead *head, int dictID, char* attribute_name, char* compType, char* value);
 	int tableScanRangeSelector(struct dbSysHead *head, int dictID, char* attribute_name, char* min, char* max);
 
+	int tableScanCountSelectorByCond(struct dbSysHead *head, int dictID, char* attribute_name, char* compType, char* value);
 	//projection.cpp
 	int projection(struct dbSysHead *head, int dictID, char* attribute_name);
 	int getValueByAttrID(char *str, int index, char *result);
@@ -50,7 +53,6 @@ public:
 	int nestedLoopJoinByThree(struct dbSysHead *head, int employee_dictID, int department_dictID, int birthday_dictID);
 	int SortJoin(struct dbSysHead *head, int employee_dictID, int department_dictID);
 	int HashJoin(struct dbSysHead *head, int employee_dictID, int department_dictID);
-
 
 	//tmpTable.cpp
 	int createTmpTable(struct dbSysHead *head, Relation original_rl);

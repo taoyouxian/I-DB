@@ -2,12 +2,12 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QtWidgets\QMainWindow>
 #include <memory>
 #include "ui_glwidget.h"
 #include "ui_table.h" 
 #include "storage.h" 
 #include "Table.h"
+#include <QtWidgets\QMainWindow>
 
 #include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
@@ -28,8 +28,11 @@ public:
     MainWindow(QWidget *parent = 0);
 	~MainWindow();
 
-signals:
-	void SGNewTable();
+//signals:
+//	void SGNewTable();
+
+private slots:  
+    void receiveData(QString data);   //接收传递过来的数据的槽  
 
 private: 
 	shared_ptr<Table>			m_QtableWin;			//	新建窗口
@@ -86,6 +89,7 @@ public:
 	QTextBrowser		*sysTables;
 	QTextBrowser		*showBrowser;
 	QTextBrowser		*tBrowser;
+	QComboBox       *cbo;
 	QTextBrowser		*tQuery;
 	QTextEdit		*sqlText;
 	QTextEdit		*loadText;
@@ -104,7 +108,8 @@ public:
 
 
 	QTableWidget		*tableWidget;
-
+public slots:
+	void	changeCboxValue(int index);
 /**槽函数**/ 
 public:
 	// 文件读取
@@ -123,7 +128,7 @@ public:
 	void	ShowDBInfo();
 	void	LoadData();
 	void	Backup();
-	void	ShowFileDesc();
+	void	ShowFileDesc(); 
 	// 按照页号来检索内容
 	void SearchByPageNo();
 	void QueryBySQL();
@@ -138,6 +143,7 @@ public:
 
 	char fileName[15];
 
+	int choice;
 	string fileLog;
 	string welcomeLog;
 

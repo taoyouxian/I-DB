@@ -433,39 +433,43 @@ void FileOpt::readFile(struct dbSysHead *head, int dictID, char* attribute_name,
 
 		memcpy(&preOffset, head->buff.data[mapNo] + SIZE_PAGEHEAD, SIZE_OFFSET);
 		int readLength = 0;
-
+		if (ph.curRecordNum == 0){
+			ui->tableWidget->setRowCount(rowID-1);
+		}
 		for (int j = 0; j < ph.curRecordNum; j++) {
 			memcpy(&curOffset, head->buff.data[mapNo] + SIZE_PAGEHEAD + SIZE_OFFSET * j, SIZE_OFFSET); 
 			fout << curOffset.logicID << curOffset.recordID << "\t" << curOffset.offset << "\t" << curOffset.isDeleted << endl;
-			if (j == 0)
-				readLength = curOffset.offset;
-			else
-				readLength = curOffset.offset - preOffset.offset;
-			char *des = (char*)malloc(readLength);
-			memset(des, 0, readLength);
-			memcpy(des, head->buff.data[mapNo] + SIZE_PER_PAGE - curOffset.offset, readLength);
-			des[readLength] = '\0'; 
-			fout << des << endl;
-			
+			if (curOffset.isDeleted == 0){
+				if (j == 0)
+					readLength = curOffset.offset;
+				else
+					readLength = curOffset.offset - preOffset.offset;
+				char *des = (char*)malloc(readLength);
+				memset(des, 0, readLength);
+				memcpy(des, head->buff.data[mapNo] + SIZE_PER_PAGE - curOffset.offset, readLength);
+				des[readLength] = '\0';
+				fout << des << endl;
 
-			char str1[25];
-			itoa(rowID, str1, 10); 
 
-			ui->tableWidget->setRowCount(rowID);
-			rowID++;
-			rowLabels << str1;
-			// for 循环 
-			v = InfoSplit(des, "|");
-			int row = rowID - 2;
-			QTableWidgetItem *item0 = new QTableWidgetItem;
+				char str1[25];
+				itoa(rowID, str1, 10);
 
-			for (int z = 0; z < v.size(); z++){   
-				item0->setText(v[z].c_str());
-				ui->tableWidget->setItem(row, z, item0);
-				item0 = new QTableWidgetItem;
-				//headerLabels << v[z].c_str();
-			}
-			//ui->tableWidget->setHorizontalHeaderLabels(headerLabels);
+				ui->tableWidget->setRowCount(rowID);
+				rowID++;
+				rowLabels << str1;
+				// for 循环 
+				v = InfoSplit(des, "|");
+				int row = rowID - 2;
+				QTableWidgetItem *item0 = new QTableWidgetItem;
+
+				for (int z = 0; z < v.size(); z++){
+					item0->setText(v[z].c_str());
+					ui->tableWidget->setItem(row, z, item0);
+					item0 = new QTableWidgetItem;
+					//headerLabels << v[z].c_str();
+				} 
+				//ui->tableWidget->setHorizontalHeaderLabels(headerLabels);
+			} 
 			preOffset = curOffset;
 		}
 		if (ph.nextPageNo < 0)
@@ -475,6 +479,165 @@ void FileOpt::readFile(struct dbSysHead *head, int dictID, char* attribute_name,
 	}
 	fout.close();
 	//QMessageBox::about(NULL, QString::fromLocal8Bit("Info"), QString::fromLocal8Bit("Save Success."));
+}
+
+void FileOpt::deleteRecordByCompKey(struct dbSysHead *head, int dictID, char* attribute_name, char* compType, char* value, MainWindow* ui){
+	int fid = head->data_dict[dictID].fileID;
+	if (fid < 0) {
+		printf("The file number %d does not exist in the database.\n", fid);
+		return;
+	}
+	int type = head->desc.fileDesc[fid].fileType;
+	if (type == USER_FILE){
+		storage.show_Relation(head, dictID, ui);
+	}
+	else if (type == TMP_TABLE){
+		printf("\nThis a temporary tables.\n");
+	}
+	long pageNum = head->desc.fileDesc[fid].filePageNum;
+	long pageNo = head->desc.fileDesc[fid].fileFirstPageNo;
+	struct pageHead ph;
+	struct offsetInPage curOffset, preOffset;
+	int mapNo = -1;
+	   
+	Relation rl = head->data_dict[dictID];
+	int index = rl.getAttributeIndexByName(attribute_name);
+
+	vector<std::string> v;
+	for (int i = 0; i < pageNum; i++){
+		mapNo = buf.reqPage(head, pageNo);
+		memcpy(&ph, head->buff.data[mapNo], SIZE_PAGEHEAD);
+
+		/*fout << "-------- Page Head Info -------" << endl;
+		fout << "PageNo" << "\t" << ph.pageNo << endl;
+		fout << "PageFreePalce" << "\t" << ph.freeSpace << endl;
+		fout << "RecordNum Stored in CurPage" << "\t" << ph.curRecordNum << endl;
+		fout << "Offset Table ----- Record Content" << endl;
+		fout << "LogicID" << "\t" << "RecordNo" << "\t" << "Offset" << "\t" << "IsDelete" << "\t" << "Record Content" << endl;
+*/
+		memcpy(&preOffset, head->buff.data[mapNo] + SIZE_PAGEHEAD, SIZE_OFFSET);
+		int readLength = 0;
+		int recordNum = ph.curRecordNum;
+		for (int j = 0; j < ph.curRecordNum; j++) {
+			memcpy(&curOffset, head->buff.data[mapNo] + SIZE_PAGEHEAD + SIZE_OFFSET * j, SIZE_OFFSET); 
+			//fout << curOffset.logicID << curOffset.recordID << "\t" << curOffset.offset << "\t" << curOffset.isDeleted << endl;
+			if (curOffset.isDeleted == 0){
+				if (j == 0)
+					readLength = curOffset.offset;
+				else
+					readLength = curOffset.offset - preOffset.offset;
+				char *des = (char*)malloc(readLength);
+				memset(des, 0, readLength);
+				memcpy(des, head->buff.data[mapNo] + SIZE_PER_PAGE - curOffset.offset, readLength);
+				des[readLength] = '\0';
+				int flag = 0;
+				v = InfoSplit(des, "|");
+				char* val = const_cast<char*>(v[index].c_str());
+				if (strcmp(compType, "=") == 0){
+					if (strcmp(val, value) == 0){
+						flag = 1;
+					}
+				}
+				else if (strcmp(compType, ">=") == 0){
+					if (strcmp(val, value) >= 0){
+						flag = 1;
+					}
+				}
+				else if (strcmp(compType, "<=") == 0){
+					if (strcmp(val, value) <= 0){
+						flag = 1;
+					}
+				}
+				else if (strcmp(compType, "!=") == 0){
+					if (strcmp(val, value) != 0){
+						flag = 1;
+					}
+				}
+				else if (strcmp(compType, ">") == 0){
+					if (strcmp(val, value) > 0){
+						flag = 1;
+					}
+				}
+				else if (strcmp(compType, "<") == 0){
+					if (strcmp(val, value) < 0){
+						flag = 1;
+					}
+				}
+				if (flag == 1){
+					curOffset.isDeleted = 1;
+					memcpy(head->buff.data[mapNo] + SIZE_PAGEHEAD + SIZE_OFFSET * j, &curOffset, SIZE_OFFSET);
+					recordNum--;
+					flag = 0;
+				}
+			}
+			//fout << des << endl; 
+
+			preOffset = curOffset;
+		}
+		ph.curDelNum = ph.curRecordNum - recordNum;
+		// 影响后期遍历
+		memcpy(head->buff.data[mapNo], &ph, SIZE_PAGEHEAD);
+		if (ph.nextPageNo < 0)
+			break;
+		else
+			pageNo = ph.nextPageNo;
+	} 
+	//QMessageBox::about(NULL, QString::fromLocal8Bit("Info"), QString::fromLocal8Bit("Save Success."));
+}
+
+void FileOpt::deleteRecord(struct dbSysHead *head, int dictID, MainWindow* ui){
+	int fid = head->data_dict[dictID].fileID;
+	if (fid < 0) {
+		printf("The file number %d does not exist in the database.\n", fid);
+		return;
+	}
+	int type = head->desc.fileDesc[fid].fileType;
+	if (type == USER_FILE){
+		storage.show_Relation(head, dictID, ui);
+	}
+	else if (type == TMP_TABLE){
+		printf("\nThis a temporary tables.\n");
+	}
+	long pageNum = head->desc.fileDesc[fid].filePageNum;
+	long pageNo = head->desc.fileDesc[fid].fileFirstPageNo;
+	struct pageHead ph;
+	struct offsetInPage curOffset, preOffset;
+	int mapNo = -1;
+	     
+	vector<std::string> v;
+	for (int i = 0; i < pageNum; i++){
+		mapNo = buf.reqPage(head, pageNo);
+		memcpy(&ph, head->buff.data[mapNo], SIZE_PAGEHEAD); 
+		memcpy(&preOffset, head->buff.data[mapNo] + SIZE_PAGEHEAD, SIZE_OFFSET);
+		int readLength = 0;
+		int recordNum = ph.curRecordNum;
+		for (int j = 0; j < ph.curRecordNum; j++) {
+			memcpy(&curOffset, head->buff.data[mapNo] + SIZE_PAGEHEAD + SIZE_OFFSET * j, SIZE_OFFSET); 
+			if (curOffset.isDeleted == 0){
+				/*if (j == 0)
+					readLength = curOffset.offset;
+				else
+					readLength = curOffset.offset - preOffset.offset;
+				char *des = (char*)malloc(readLength);
+				memset(des, 0, readLength);
+				memcpy(des, head->buff.data[mapNo] + SIZE_PER_PAGE - curOffset.offset, readLength);
+				des[readLength] = '\0';*/ 
+
+					curOffset.isDeleted = 1;
+					memcpy(head->buff.data[mapNo] + SIZE_PAGEHEAD + SIZE_OFFSET * j, &curOffset, SIZE_OFFSET);
+					recordNum--; 
+			} 
+
+			preOffset = curOffset;
+		}
+		ph.curDelNum = ph.curRecordNum - recordNum;
+		// 影响后期遍历
+		memcpy(head->buff.data[mapNo], &ph, SIZE_PAGEHEAD);
+		if (ph.nextPageNo < 0)
+			break;
+		else
+			pageNo = ph.nextPageNo;
+	}  
 }
 
 void FileOpt::writeFile(struct dbSysHead *head, int dictID, MainWindow* ui){
