@@ -1,30 +1,18 @@
 # I*DB
-A single user RDBMS core.
+A single user RDBMS core, see structure
 
-# Demonstration
-- structure
 ![IMAGE](https://github.com/taoyouxian/I-DB/blob/master/docx/images/structure.png)
 
+# Demonstration
+For more, see [System-Overview](https://github.com/taoyouxian/I-DB/wiki/System-Overview)
+
 - system
+
 ![IMAGE](https://github.com/taoyouxian/I-DB/blob/master/docx/images/system.png)
 
 - System-init
+
 ![IMAGE](https://github.com/taoyouxian/I-DB/blob/master/docx/images/init.png)
-
-- System-new table
-![IMAGE](https://github.com/taoyouxian/I-DB/blob/master/docx/images/table.png)
-
-- SQL-count
-![IMAGE](https://github.com/taoyouxian/I-DB/blob/master/docx/images/count.png)
-
-- SQL-equal
-![IMAGE](https://github.com/taoyouxian/I-DB/blob/master/docx/images/equal.png)
-
-- SQL-range
-![IMAGE](https://github.com/taoyouxian/I-DB/blob/master/docx/images/range.png)
-
-- SQL-join
-![IMAGE](https://github.com/taoyouxian/I-DB/blob/master/docx/images/join3.png)
 
 # Introduction
 This tutorial focuses on building a simple DBMS system.
@@ -32,7 +20,7 @@ In this tutorial, we need these tools:
 - [VS2013](https://www.visualstudio.com/en-us/news/releasenotes/vs2013-community-vs)
 - [QT5.7.1](https://download.qt.io/official_releases/qt/5.7/5.7.0/qt-opensource-windows-x86-msvc2013_64-5.7.0.exe.mirrorlist)
 
-For environmental configuration, see this [blog](Environmental configuration).
+For environmental configuration, see this [blog](https://www.cnblogs.com/liuruoqian/p/5940413.html).
 OK, here we go.
 
 # Tutorial
