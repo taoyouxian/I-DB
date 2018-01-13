@@ -1,0 +1,6 @@
+6
+select
+selects:,s_superkey,ps_availqty
+table:,partsupp
+where_clause:
+order_clause:NULL
