@@ -21,6 +21,7 @@ In this tutorial, we need these tools:
 - [QT5.7.1](https://download.qt.io/official_releases/qt/5.7/5.7.0/qt-opensource-windows-x86-msvc2013_64-5.7.0.exe.mirrorlist)
 
 For environmental configuration, see this [blog](https://www.cnblogs.com/liuruoqian/p/5940413.html).
+
 OK, here we go.
 
 # Tutorial

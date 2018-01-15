@@ -65,8 +65,8 @@ int PageOpt::setBit(unsigned long *num, long pos, int setValue){
 }
 
 // 分配页
-long PageOpt::allocatePage(struct dbSysHead *head, long reqPageNum){
-	if (head->desc.AvaiPage == 0){
+long PageOpt::allocatePage(struct DbMetaHead *head, long requestPageNum){
+	if (head->desc.pageFree == 0){
 		printf("分配页空间失败！当前该数据库暂无可用空闲页\n");
 		exit(0);
 	}
@@ -74,53 +74,57 @@ long PageOpt::allocatePage(struct dbSysHead *head, long reqPageNum){
 	int count = 0;
 	long i, j;
 	long alloStaPage;
-	long totalPage = head->desc.TotalPage;
+	long pageSum = head->desc.pageSum;
 
-	for (i = 0; i < totalPage; i++) {
+	for (i = 0; i < pageSum; i++) {
 		page = i / (8 * sizeof(long));
 		pos = i - 8 * sizeof(long) * page + 1;
 		count = 0;
-		if (getBit(*(head->FreeSpace_bitMap + page), pos) == PAGE_AVAI) {
-			for (j = i; count < reqPageNum && j < totalPage; j++) {
+		if (getBit(*(head->FreeSpace_bitMap + page), pos) == PAGE_FREE) {
+			for (j = i; count < requestPageNum && j < pageSum; j++) {
 				page = j / (8 * sizeof(long));
 				pos = j - 8 * sizeof(long) * page + 1;
-				if (getBit(*(head->FreeSpace_bitMap + page), pos) == PAGE_AVAI)
+				if (getBit(*(head->FreeSpace_bitMap + page), pos) == PAGE_FREE)
 					count++;
 				else
 					break;
 			}
 		}
-		if (count == reqPageNum)
+		if (count == requestPageNum)
 			break;
 		else
 			i = i + count;
 	}
-	if (count != reqPageNum) {
+	if (count != requestPageNum) {
 		return ALLO_FAIL;
 	}
 	else {
 		alloStaPage = i;
-		for (j = 0; j < reqPageNum; j++) {
+		for (j = 0; j < requestPageNum; j++) {
 			page = (i + j) / (8 * sizeof(long));
 			pos = (i + j) - 8 * sizeof(long) * page + 1;
-			setBit(head->FreeSpace_bitMap + page, pos, PAGE_UNAVAI);
+			setBit(head->FreeSpace_bitMap + page, pos, PAGE_UNFREE);
 		}
-		(head->desc).AvaiPage -= reqPageNum;
+		(head->desc).pageFree -= requestPageNum;
 	}
 
 	return alloStaPage;
+	return 0;
 }
 
 //回收一页
-void PageOpt::recyOnePage(struct dbSysHead *head, long pageNo) {
-	long page = pageNo / (sizeof(long) * 8);
-	long pos = pageNo - page * 8 * sizeof(long) + 1;
-	setBit(head->FreeSpace_bitMap + page, pos, PAGE_AVAI);
+void PageOpt::recyOnePage(struct DbMetaHead *head, long pageNo)
+{
+	int page, pos;
+
+	page = pageNo / (sizeof(long) * 8);
+	pos = pageNo - page * 8 * sizeof(long) + 1;
+	setBit(head->FreeSpace_bitMap + page, pos, PAGE_FREE);
 }
 
-void PageOpt::recyAllPage(struct dbSysHead *head) {
-	for (long i = 0; i < head->desc.TotalPage; i++) {
+void PageOpt::recyAllPage(struct DbMetaHead *head) {
+	for (long i = 0; i < head->desc.pageSum; i++) {
 		recyOnePage(head, i);
 	}
-	head->desc.AvaiPage = head->desc.TotalPage;
+	head->desc.pageFree = head->desc.pageSum;
 }

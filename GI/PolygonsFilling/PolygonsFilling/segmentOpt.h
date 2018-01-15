@@ -25,9 +25,9 @@ public:
 
 	int getBit(unsigned long num, long pos);
 	int setBit(unsigned long *num, long pos, int setValue);
-	long allocateSegment(struct dbSysHead *head, long reqSegmentNum);
-	void recyOneSegment(struct dbSysHead *head, long SegmentNo);
-	void recyAllSegment(struct dbSysHead *head);
+	long allocateSegment(struct DbMetaHead *head, long reqSegmentNum);
+	void recyOneSegment(struct DbMetaHead *head, long SegmentNo);
+	void recyAllSegment(struct DbMetaHead *head);
 };
 
 #endif // SEGMENT_H_INCLUDED
